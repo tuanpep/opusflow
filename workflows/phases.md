@@ -30,7 +30,7 @@ Describe your goal with relevant context:
 
 ### Step 2: Intent Clarification
 
-Traycer clarifies your requirements (if needed):
+The Agent clarifies your requirements (if needed):
 
 - **Business goals** and user flows
 - **Architecture** and integration needs
@@ -71,10 +71,9 @@ For the current phase, generate a detailed plan:
 
 *Use the [Plan Workflow](plan.md) for this step.*
 
-### Step 5: Hand off to Agent
+### Step 5: Execute
 
-Execute the plan with your coding agent:
-- Cursor, Claude Code, Windsurf, Cline, Gemini CLI, etc.
+Execute the plan with your coding agent.
 
 ### Step 6: Verification
 

@@ -39,7 +39,7 @@ Context:
 
 ### Step 2: Detailed File-Level Plan
 
-Traycer generates a comprehensive plan with:
+The Agent generates a comprehensive plan with:
 
 - **File analysis & structure**: What exists, what needs to change
 - **Symbol references**: Functions, types, interfaces to use
@@ -84,15 +84,11 @@ Do not re-verify what's written in the plan.
 ...
 ```
 
-### Step 3: Execute in Agent
+### Step 3: Execute
 
-Hand off the plan to your coding agent:
+Execute the plan with your coding agent:
 
-- **Cursor**: Copy plan to composer
-- **Claude Code**: Paste plan in chat
-- **Windsurf**: Use cascade with plan
-- **Gemini CLI**: Provide plan as context
-- **Other agents**: Export as markdown
+- **Agent**: Apply the implementation steps verify directly.
 
 ### Step 4: Verification
 

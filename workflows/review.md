@@ -41,7 +41,7 @@ Context:
 
 ### Step 2: Comprehensive Code Review
 
-Traycer performs deep analysis:
+The Agent performs deep analysis:
 
 - **Deep code exploration** across files and dependencies
 - **Implementation analysis** to understand context and impact
@@ -128,7 +128,7 @@ After review comments are generated:
 
 1. **Fix individual comments**: Address specific issues one at a time
 2. **Fix selected comments**: Choose multiple comments to fix together
-3. **Fix all comments**: Send all review comments to your agent
+3. **Fix all comments**: Send all review comments to your agent to apply
 
 ---
 

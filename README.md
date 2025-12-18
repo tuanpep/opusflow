@@ -38,8 +38,8 @@ Best for well-scoped tasks that fit in one PR.
 
 ```
 1. User Query      → Describe task with file/folder context
-2. Detailed Plan   → Traycer generates file-level implementation steps
-3. Execute         → Hand off to coding agent (Cursor, Claude, etc.)
+2. Detailed Plan   → The Agent generates file-level implementation steps
+3. Execute         → Agent implements the plan
 4. Verification    → Verify implementation against plan
 5. Complete        → Commit and ship
 ```
@@ -56,7 +56,7 @@ Best for features spanning multiple services or requiring multiple PRs.
 ┌─────────────────────────────────────────────┐
 │  For each phase:                            │
 │  4. Phase Planning  → Generate detailed plan│
-│  5. Execute         → Hand off to agent     │
+│  5. Execute         → Agent implements      │
 │  6. Verification    → Verify against plan   │
 │  7. Next Phase      → Proceed with context  │
 └─────────────────────────────────────────────┘
@@ -114,19 +114,13 @@ See: [agents.md standard](https://agents.md)
 
 ---
 
-## 🔗 Compatible Agents
+## 🔗 Local Usage
 
-These workflows work with any AI coding agent:
+These workflows are standard markdown files. To use them:
 
-| Agent | Type | Handoff Method |
-|-------|------|----------------|
-| **Cursor** | IDE | Composer paste |
-| **Claude Code** | CLI/Extension | Chat paste |
-| **Windsurf** | IDE | Cascade input |
-| **Gemini CLI** | CLI | Context file |
-| **GitHub Copilot** | IDE | Chat input |
-| **Cline** | Extension | Chat input |
-| **Any others** | — | Export as markdown |
+1. **Trigger**: Ask your AI assistant (e.g., Antigravity, Cursor, etc.) to read the desired workflow file (e.g., `traycer-workflow/workflows/plan.md`).
+2. **Execute**: The agent will follow the step-by-step instructions defined in the file.
+3. **Context**: Ensure the agent also reads `traycer-workflow/AGENTS.md` for project-specific context.
 
 ---
 
