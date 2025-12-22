@@ -34,17 +34,18 @@ func TestFindProjectRoot(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	// Case 5: No root markers
+	// Case 5: No root markers (will be auto-initialized)
 	noRootDir := filepath.Join(baseDir, "no_root")
 	if err := os.MkdirAll(noRootDir, 0755); err != nil {
 		t.Fatal(err)
 	}
 
 	tests := []struct {
-		name    string
-		cwd     string
-		want    string
-		wantErr bool
+		name          string
+		cwd           string
+		want          string
+		wantErr       bool
+		checkAutoInit bool
 	}{
 		{
 			name:    "Root found via .agent",
@@ -71,9 +72,11 @@ func TestFindProjectRoot(t *testing.T) {
 			wantErr: false,
 		},
 		{
-			name:    "No root found",
-			cwd:     noRootDir,
-			wantErr: true,
+			name:          "No root markers - auto-initializes",
+			cwd:           noRootDir,
+			want:          noRootDir,
+			wantErr:       false,
+			checkAutoInit: true,
 		},
 	}
 
@@ -100,6 +103,21 @@ func TestFindProjectRoot(t *testing.T) {
 				evalWant, _ := filepath.EvalSymlinks(tt.want)
 				if evalGot != evalWant {
 					t.Errorf("FindProjectRoot() = %v, want %v", got, tt.want)
+				}
+
+				// Verify auto-init created the expected directories
+				if tt.checkAutoInit {
+					expectedDirs := []string{
+						filepath.Join(got, ".agent", "workflows"),
+						filepath.Join(got, "opusflow-planning", "plans"),
+						filepath.Join(got, "opusflow-planning", "phases"),
+						filepath.Join(got, "opusflow-planning", "verifications"),
+					}
+					for _, dir := range expectedDirs {
+						if _, err := os.Stat(dir); os.IsNotExist(err) {
+							t.Errorf("Auto-init did not create expected directory: %s", dir)
+						}
+					}
 				}
 			}
 		})

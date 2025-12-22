@@ -63,7 +63,14 @@ To support monorepos and flexible setups, OpusFlow dynamically locates the proje
 1.  `opusflow-planning/` directory
 2.  `.agent/` directory
 3.  `.git/` directory
-This allows you to nest the tool inside sub-folders or run it from the root of a large monorepo.
+
+**Auto-Initialization**: If no markers are found, OpusFlow automatically initializes the project at the current working directory by creating:
+- `.agent/workflows/` - For workflow definitions
+- `opusflow-planning/plans/` - For implementation plans
+- `opusflow-planning/phases/` - For multi-phase breakdowns
+- `opusflow-planning/verifications/` - For verification reports
+
+This allows OpusFlow to work seamlessly in fresh projects without manual setup, making it ideal for use as an MCP server in any directory.
 
 ## Workflows
 
