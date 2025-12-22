@@ -25,6 +25,11 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           default_bump: patch
 
+      - name: Fetch and checkout tag
+        run: |
+          git fetch --tags
+          git checkout ${{ steps.tag_version.outputs.new_tag }}
+
       - name: Set up Go
         uses: actions/setup-go@v5
         with:
