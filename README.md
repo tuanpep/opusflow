@@ -19,7 +19,7 @@ OpusFlow is a development orchestration tool designed to bridge the gap between 
 The fastest way to get started. Installs the binary to `/usr/local/bin`.
 
 ```bash
-curl -sL https://raw.githubusercontent.com/tuanpep/oplusflow/main/install.sh | bash
+curl -sL "https://raw.githubusercontent.com/tuanpep/oplusflow/main/install.sh?v=$(date +%s)" | bash
 ```
 
 ### Option 2: Windows / Manual
