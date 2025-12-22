@@ -1,6 +1,7 @@
 import * as vscode from 'vscode';
 import * as path from 'path';
 import { AuthManager } from './auth/authManager';
+import { AgentAuth } from './auth/agentAuth';
 import { SidebarProvider } from './SidebarProvider';
 import { FileWatcher } from './utils/fileWatcher';
 import { OpusFlowExplorerProvider } from './ui/opusflowExplorer';
@@ -262,6 +263,13 @@ function registerCommands(
         () => workflowHandlers.showNextGuidance()
     );
 
+    // Setup API Keys command
+    const agentAuth = new AgentAuth(context);
+    const setupApiKeysCmd = vscode.commands.registerCommand(
+        'opusflow.setupApiKeys',
+        () => agentAuth.setupApiKeys()
+    );
+
     // Add all commands to subscriptions for cleanup
     context.subscriptions.push(
         // Original commands
@@ -282,6 +290,7 @@ function registerCommands(
         execTaskCmd,
         workflowStatusCmd,
         workflowStartCmd,
-        workflowNextCmd
+        workflowNextCmd,
+        setupApiKeysCmd
     );
 }

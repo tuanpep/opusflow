@@ -108,6 +108,11 @@
         "command": "opusflow.workflowNext",
         "title": "OpusFlow: Next Step Guidance",
         "icon": "$(lightbulb)"
+      },
+      {
+        "command": "opusflow.setupApiKeys",
+        "title": "OpusFlow: Setup API Keys",
+        "icon": "$(key)"
       }
     ],
     "viewsContainers": {
@@ -156,6 +161,21 @@
           "type": "boolean",
           "default": true,
           "description": "Auto-refresh UI when files change"
+        },
+        "opusflow.apiKeys.anthropic": {
+          "type": "string",
+          "default": "",
+          "markdownDescription": "Anthropic API key for **Aider** and **Claude Code**. Get yours at [console.anthropic.com](https://console.anthropic.com/)"
+        },
+        "opusflow.apiKeys.openai": {
+          "type": "string",
+          "default": "",
+          "markdownDescription": "OpenAI API key for **Aider** with GPT models. Get yours at [platform.openai.com](https://platform.openai.com/api-keys)"
+        },
+        "opusflow.apiKeys.gemini": {
+          "type": "string",
+          "default": "",
+          "markdownDescription": "Gemini API key for **Gemini CLI**. Get yours at [aistudio.google.com](https://aistudio.google.com/)"
         }
       }
     },
