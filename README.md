@@ -34,12 +34,34 @@ The easiest way to use OpusFlow is via the CLI.
 
 ### 1. Installation
 
+**Option A: Download Binary (Recommended)**
+1.  Download the latest release for your OS from the [Releases Page](https://github.com/ergonml/opusflow/releases).
+2.  Unzip the file and place the binary in your path.
+
+**Option B: Install from Source**
 ```bash
 cd opusflow/cli
 go install .
 ```
 
-### 2. Workflow
+### 2. Configure for AI Agents (Claude Desktop)
+
+To let your AI Agent use OpusFlow, add it to your config file:
+- **Mac**: `~/Library/Application Support/Claude/claude_desktop_config.json`
+- **Windows**: `%APPDATA%\Claude\claude_desktop_config.json`
+
+```json
+{
+  "mcpServers": {
+    "opusflow": {
+      "command": "/path/to/opusflow",
+      "args": ["mcp"]
+    }
+  }
+}
+```
+
+### 3. Workflow
 
 #### Step 1: Create a Plan
 Tell OpusFlow what you want to build.
