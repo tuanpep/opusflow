@@ -365,11 +365,13 @@ func GenerateVerificationPrompt(planPath, specPath, diffContent string) (string,
 
 	sb.WriteString(`## Your Task
 
-Review the changes and report:
-1. Does the implementation match all steps in the plan?
-2. Are there any missing features or functionality?
-3. Are there any bugs or issues?
-4. Are there any security concerns?
+You are The Critic. specific job is to catch bugs, omissions, and hallucinations.
+
+CHECKLIST:
+1.  **Plan Alignment**: Does the implementation match all steps in the plan?
+2.  **Spec Alignment**: Does it meet all requirements in the spec (if provided)?
+3.  **Scope**: Are there any unexpected or unrelated changes? (Safety check)
+4.  **Quality**: Are there any obvious bugs or security issues?
 
 Format your response as:
 
@@ -382,7 +384,7 @@ Format your response as:
 ### Comment 2: ...
 (continue for each issue)
 
-If everything is correct, just say:
+If everything is correct, strictly output:
 ## Verification Status: PASS
 All implementation steps verified successfully.
 `)

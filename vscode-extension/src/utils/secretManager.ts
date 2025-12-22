@@ -4,7 +4,7 @@ import { AuthSession } from '../auth/types';
 export class SecretManager {
     private static readonly KEY_PREFIX = 'opusflow.auth.';
 
-    constructor(private readonly secretStorage: vscode.SecretStorage) { }
+    constructor(private readonly secretStorage: vscode.SecretStorage) {}
 
     public async saveSession(session: AuthSession): Promise<void> {
         const key = this.getSessionKey(session.provider);

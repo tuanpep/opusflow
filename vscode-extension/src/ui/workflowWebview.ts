@@ -7,9 +7,7 @@ export class WorkflowWebview {
     private _disposables: vscode.Disposable[] = [];
 
     public static createOrShow(extensionUri: vscode.Uri) {
-        const column = vscode.window.activeTextEditor
-            ? vscode.window.activeTextEditor.viewColumn
-            : undefined;
+        const column = vscode.window.activeTextEditor ? vscode.window.activeTextEditor.viewColumn : undefined;
 
         if (WorkflowWebview._currentPanel) {
             WorkflowWebview._currentPanel._panel.reveal(column);
@@ -40,7 +38,7 @@ export class WorkflowWebview {
         this._panel.webview.html = this._getHtmlForWebview(this._panel.webview);
 
         this._panel.webview.onDidReceiveMessage(
-            message => {
+            (message) => {
                 switch (message.command) {
                     case 'alert':
                         vscode.window.showErrorMessage(message.text);
@@ -92,9 +90,15 @@ export class WorkflowWebview {
     }
 
     private _getHtmlForWebview(webview: vscode.Webview) {
-        const scriptUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, 'resources', 'webview', 'js', 'main.js'));
-        const styleUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, 'resources', 'webview', 'css', 'style.css'));
-        const markedUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, 'node_modules', 'marked', 'marked.min.js'));
+        const scriptUri = webview.asWebviewUri(
+            vscode.Uri.joinPath(this._extensionUri, 'resources', 'webview', 'js', 'main.js')
+        );
+        const styleUri = webview.asWebviewUri(
+            vscode.Uri.joinPath(this._extensionUri, 'resources', 'webview', 'css', 'style.css')
+        );
+        const markedUri = webview.asWebviewUri(
+            vscode.Uri.joinPath(this._extensionUri, 'node_modules', 'marked', 'marked.min.js')
+        );
 
         return `<!DOCTYPE html>
             <html lang="en">

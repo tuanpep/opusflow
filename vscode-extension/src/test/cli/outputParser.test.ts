@@ -10,7 +10,8 @@ describe('OutputParser', () => {
 
     describe('parsePlanOutput', () => {
         it('should correctly parse plan path and filename', () => {
-            const stdout = 'Created plan: /path/to/project/opusflow-planning/plan-2023-12-22-feat.md\nTo fill this plan, run:\n  opusflow prompt plan plan-2023-12-22-feat.md';
+            const stdout =
+                'Created plan: /path/to/project/opusflow-planning/plan-2023-12-22-feat.md\nTo fill this plan, run:\n  opusflow prompt plan plan-2023-12-22-feat.md';
             const result = parser.parsePlanOutput(stdout);
             expect(result.fullPath).to.equal('/path/to/project/opusflow-planning/plan-2023-12-22-feat.md');
             expect(result.filename).to.equal('plan-2023-12-22-feat.md');

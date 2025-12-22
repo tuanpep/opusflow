@@ -349,7 +349,10 @@ func GenerateTaskPrompt(task *Task, planContent string) string {
 	sb.WriteString(fmt.Sprintf("**Step Number**: %d\n\n", task.StepNumber))
 
 	sb.WriteString("## Instructions\n\n")
-	sb.WriteString("Implement ONLY this specific step. Do not implement other steps.\n\n")
+	sb.WriteString("You are The Builder. Your goal is to implement ONLY this specific step.\n")
+	sb.WriteString("1.  **Strict Scope**: Do not implement other steps.\n")
+	sb.WriteString("2.  **Files**: Only modify the files listed below (unless strictly necessary).\n")
+	sb.WriteString("3.  **Verification**: Ensure the code compiles and tests pass.\n\n")
 
 	if len(task.Files) > 0 {
 		sb.WriteString("**Files to modify/create**:\n")
@@ -359,15 +362,21 @@ func GenerateTaskPrompt(task *Task, planContent string) string {
 		sb.WriteString("\n")
 	}
 
+	if len(task.Dependencies) > 0 {
+		sb.WriteString("**Dependencies**:\n")
+		sb.WriteString("This task depends on the following previous tasks:\n")
+		sb.WriteString(strings.Join(task.Dependencies, ", "))
+		sb.WriteString("\n\n")
+	}
+
 	sb.WriteString("## Task Details\n\n")
 	sb.WriteString(task.Description)
 	sb.WriteString("\n\n")
 
 	sb.WriteString("## After Completion\n\n")
-	sb.WriteString("When done, verify:\n")
-	sb.WriteString("1. All files listed above have been created/modified\n")
-	sb.WriteString("2. Code compiles without errors\n")
-	sb.WriteString("3. No unrelated changes were made\n")
+	sb.WriteString("Run the following to verify your work:\n")
+	sb.WriteString("1.  `go build ./...` (or equivalent)\n")
+	sb.WriteString("2.  `go test ./...` (if applicable)\n")
 
 	return sb.String()
 }

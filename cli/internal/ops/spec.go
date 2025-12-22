@@ -43,7 +43,7 @@ func CreateSpec(title, query string, contextFiles []string) (*SpecResult, error)
 	fullPath := filepath.Join(specsDir, filename)
 
 	// Generate codebase map for context
-	codebaseMap, _ := GenerateCodebaseMap("", nil, nil)
+	codebaseMap, _ := GenerateCodebaseMap("", nil, nil, 2000)
 	var codebaseSummary string
 	if codebaseMap != nil {
 		codebaseSummary = codebaseMap.FormatSummary()
@@ -88,21 +88,21 @@ func generateSpecContent(title, query, codebaseSummary, contextContent string) s
 	sb.WriteString("## Goal\n\n")
 	sb.WriteString(fmt.Sprintf("> %s\n\n", query))
 	sb.WriteString("<!-- Describe the high-level objective. What are we building and why? -->\n\n")
-	sb.WriteString("[TODO: Expand the goal description here]\n\n")
+	sb.WriteString("[TODO: Expand the goal description here with clear business context]\n\n")
 
 	// User Stories
 	sb.WriteString("## User Stories\n\n")
 	sb.WriteString("<!-- Define user stories in the format: As a [role], I want [feature] so that [benefit] -->\n\n")
-	sb.WriteString("- [ ] As a **[role]**, I want **[feature]** so that **[benefit]**\n")
-	sb.WriteString("- [ ] As a **[role]**, I want **[feature]** so that **[benefit]**\n\n")
+	sb.WriteString("- [ ] As a **[User Role]**, I want **[Feature Description]** so that **[Benefit/Value]**\n")
+	sb.WriteString("- [ ] As a **[User Role]**, I want **[Feature Description]** so that **[Benefit/Value]**\n\n")
 
 	// Requirements
 	sb.WriteString("## Requirements\n\n")
 	sb.WriteString("### Functional Requirements\n\n")
 	sb.WriteString("<!-- What must the system do? -->\n\n")
-	sb.WriteString("- [ ] **FR1**: [Requirement description]\n")
-	sb.WriteString("- [ ] **FR2**: [Requirement description]\n")
-	sb.WriteString("- [ ] **FR3**: [Requirement description]\n\n")
+	sb.WriteString("- [ ] **FR1**: [Description of Functional Requirement]\n")
+	sb.WriteString("- [ ] **FR2**: [Description of Functional Requirement]\n")
+	sb.WriteString("- [ ] **FR3**: [Description of Functional Requirement]\n\n")
 
 	sb.WriteString("### Non-Functional Requirements\n\n")
 	sb.WriteString("<!-- Performance, security, scalability constraints -->\n\n")
@@ -139,9 +139,9 @@ func generateSpecContent(title, query, codebaseSummary, contextContent string) s
 	sb.WriteString("<!-- Document edge cases and expected behavior -->\n\n")
 	sb.WriteString("| Edge Case | Expected Behavior |\n")
 	sb.WriteString("|-----------|-------------------|\n")
-	sb.WriteString("| [Empty input] | [Return validation error] |\n")
-	sb.WriteString("| [Duplicate entry] | [Return 409 conflict] |\n")
-	sb.WriteString("| [Unauthorized access] | [Return 401/403] |\n\n")
+	sb.WriteString("| [Empty input] | [Return validation error with specific message] |\n")
+	sb.WriteString("| [Duplicate entry] | [Return 409 Conflict with resource location] |\n")
+	sb.WriteString("| [Unauthorized access] | [Return 401/403 with auth challenge] |\n\n")
 
 	// Out of Scope
 	sb.WriteString("## Out of Scope\n\n")
@@ -152,10 +152,10 @@ func generateSpecContent(title, query, codebaseSummary, contextContent string) s
 	// Success Criteria
 	sb.WriteString("## Success Criteria\n\n")
 	sb.WriteString("<!-- Measurable criteria to verify the feature is complete -->\n\n")
-	sb.WriteString("- [ ] **SC1**: [e.g., All unit tests pass]\n")
-	sb.WriteString("- [ ] **SC2**: [e.g., API returns expected response for happy path]\n")
-	sb.WriteString("- [ ] **SC3**: [e.g., Error cases return appropriate status codes]\n")
-	sb.WriteString("- [ ] **SC4**: [e.g., Documentation is updated]\n\n")
+	sb.WriteString("- [ ] **SC1**: [e.g., All unit tests pass with >80% coverage]\n")
+	sb.WriteString("- [ ] **SC2**: [e.g., API returns 200 OK with correct payload]\n")
+	sb.WriteString("- [ ] **SC3**: [e.g., Error cases return appropriate status codes (400, 4xx, 5xx)]\n")
+	sb.WriteString("- [ ] **SC4**: [e.g., Documentation updated in internal wiki]\n\n")
 
 	// Open Questions
 	sb.WriteString("## Open Questions\n\n")

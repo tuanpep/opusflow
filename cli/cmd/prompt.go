@@ -3,8 +3,8 @@ package cmd
 import (
 	"fmt"
 
-	"github.com/tuanpep/oplusflow/internal/ops"
 	"github.com/spf13/cobra"
+	"github.com/tuanpep/oplusflow/internal/ops"
 )
 
 var promptCmd = &cobra.Command{

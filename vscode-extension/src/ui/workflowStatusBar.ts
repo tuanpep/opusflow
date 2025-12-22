@@ -11,10 +11,7 @@ export class WorkflowStatusBar {
     private refreshInterval?: NodeJS.Timeout;
 
     constructor() {
-        this.statusBarItem = vscode.window.createStatusBarItem(
-            vscode.StatusBarAlignment.Left,
-            100
-        );
+        this.statusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 100);
         this.statusBarItem.command = 'opusflow.workflowStatus';
         this.initialize();
     }
@@ -33,10 +30,7 @@ export class WorkflowStatusBar {
         const workspaceFolder = vscode.workspace.workspaceFolders?.[0];
         if (!workspaceFolder) return;
 
-        const pattern = new vscode.RelativePattern(
-            workspaceFolder,
-            '.opusflow/workflow-state.json'
-        );
+        const pattern = new vscode.RelativePattern(workspaceFolder, '.opusflow/workflow-state.json');
 
         this.watcher = vscode.workspace.createFileSystemWatcher(pattern);
         this.watcher.onDidChange(() => this.updateStatus());
@@ -64,18 +58,14 @@ export class WorkflowStatusBar {
         const workspaceFolder = vscode.workspace.workspaceFolders?.[0];
         if (!workspaceFolder) return null;
 
-        const statePath = path.join(
-            workspaceFolder.uri.fsPath,
-            '.opusflow',
-            'workflow-state.json'
-        );
+        const statePath = path.join(workspaceFolder.uri.fsPath, '.opusflow', 'workflow-state.json');
 
         try {
             if (fs.existsSync(statePath)) {
                 const content = fs.readFileSync(statePath, 'utf-8');
                 return JSON.parse(content);
             }
-        } catch (e) {
+        } catch (_e) {
             // Ignore parse errors
         }
 
@@ -84,14 +74,14 @@ export class WorkflowStatusBar {
 
     private getPhaseInfo(phase: string): { icon: string; label: string } {
         const phases: Record<string, { icon: string; label: string }> = {
-            'idle': { icon: '$(rocket)', label: 'OpusFlow' },
-            'specification': { icon: '$(file-text)', label: 'Spec' },
-            'planning': { icon: '$(repo)', label: 'Planning' },
-            'decomposition': { icon: '$(list-tree)', label: 'Tasks' },
-            'execution': { icon: '$(play)', label: 'Executing' },
-            'verification': { icon: '$(beaker)', label: 'Verifying' },
-            'complete': { icon: '$(check-all)', label: 'Complete' },
-            'failed': { icon: '$(error)', label: 'Failed' }
+            idle: { icon: '$(rocket)', label: 'OpusFlow' },
+            specification: { icon: '$(file-text)', label: 'Spec' },
+            planning: { icon: '$(repo)', label: 'Planning' },
+            decomposition: { icon: '$(list-tree)', label: 'Tasks' },
+            execution: { icon: '$(play)', label: 'Executing' },
+            verification: { icon: '$(beaker)', label: 'Verifying' },
+            complete: { icon: '$(check-all)', label: 'Complete' },
+            failed: { icon: '$(error)', label: 'Failed' }
         };
 
         return phases[phase] || phases['idle'];

@@ -13,7 +13,11 @@ import {
 } from './outputParser';
 
 export class CLIError extends Error {
-    constructor(message: string, public readonly stderr?: string, public readonly exitCode?: number | null) {
+    constructor(
+        message: string,
+        public readonly stderr?: string,
+        public readonly exitCode?: number | null
+    ) {
         super(message);
         this.name = 'CLIError';
     }
@@ -42,7 +46,11 @@ export class OpusFlowWrapper {
                 onStderr: onOutput
             });
             if (result.exitCode !== 0) {
-                throw new CLIError(`Command "${this.cliCommand} ${args.join(' ')}" failed with exit code ${result.exitCode}`, result.stderr, result.exitCode);
+                throw new CLIError(
+                    `Command "${this.cliCommand} ${args.join(' ')}" failed with exit code ${result.exitCode}`,
+                    result.stderr,
+                    result.exitCode
+                );
             }
             return result;
         } catch (error: any) {
@@ -74,7 +82,7 @@ export class OpusFlowWrapper {
         try {
             await this.processManager.run(this.cliCommand, ['--help'], {});
             return true;
-        } catch (error) {
+        } catch (_error) {
             return false;
         }
     }
@@ -92,7 +100,12 @@ export class OpusFlowWrapper {
     /**
      * Create a feature specification (SPEC.md)
      */
-    public async spec(description: string, title?: string, cwd?: string, onOutput?: (data: string) => void): Promise<SpecResult> {
+    public async spec(
+        description: string,
+        title?: string,
+        cwd?: string,
+        onOutput?: (data: string) => void
+    ): Promise<SpecResult> {
         const args = ['spec', description];
         if (title) {
             args.push('--title', title);
@@ -104,7 +117,11 @@ export class OpusFlowWrapper {
     /**
      * Decompose a plan into atomic tasks
      */
-    public async decompose(planFile: string, cwd?: string, onOutput?: (data: string) => void): Promise<DecomposeResult> {
+    public async decompose(
+        planFile: string,
+        cwd?: string,
+        onOutput?: (data: string) => void
+    ): Promise<DecomposeResult> {
         const result = await this.runCommand(['decompose', planFile], cwd, onOutput);
         return this.outputParser.parseDecomposeOutput(result.stdout);
     }
@@ -142,7 +159,13 @@ export class OpusFlowWrapper {
     /**
      * Execute a task with an external agent
      */
-    public async exec(taskSpec: string, planRef: string, agent: string = 'prompt', cwd?: string, onOutput?: (data: string) => void): Promise<string> {
+    public async exec(
+        taskSpec: string,
+        planRef: string,
+        agent: string = 'prompt',
+        cwd?: string,
+        onOutput?: (data: string) => void
+    ): Promise<string> {
         const result = await this.runCommand(['exec', taskSpec, planRef, '--agent', agent], cwd, onOutput);
         return result.stdout;
     }

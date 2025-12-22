@@ -5,7 +5,7 @@ import { SecretManager } from '../utils/secretManager';
 export class GeminiAuth implements IAuthProvider {
     public readonly type = AuthProviderType.Gemini;
 
-    constructor(private readonly secretManager: SecretManager) { }
+    constructor(private readonly secretManager: SecretManager) {}
 
     public async login(): Promise<AuthSession> {
         const apiKey = await vscode.window.showInputBox({

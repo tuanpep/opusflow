@@ -16,7 +16,9 @@ export class AgentCommands {
     }
 
     public async executeWorkflow(planFile: string) {
-        const currentAgent = vscode.workspace.getConfiguration('opusflow').get<string>('defaultAgent') as AuthProviderType;
+        const currentAgent = vscode.workspace
+            .getConfiguration('opusflow')
+            .get<string>('defaultAgent') as AuthProviderType;
 
         // 1. Check Authentication
         const isAuthenticated = await this.authManager.isAuthenticated(currentAgent);
@@ -35,7 +37,7 @@ export class AgentCommands {
         vscode.commands.executeCommand('opusflow.openWorkflow');
 
         // Wait a bit for webview to be ready
-        await new Promise(resolve => setTimeout(resolve, 500));
+        await new Promise((resolve) => setTimeout(resolve, 500));
 
         // Get the webview instance
         // @ts-ignore - accessing private static member
@@ -52,7 +54,6 @@ export class AgentCommands {
         try {
             // 3. Execute the complete workflow
             await this.orchestrator.executeWorkflow(planFile, currentAgent);
-
         } catch (error: any) {
             vscode.window.showErrorMessage(`Workflow execution failed: ${error.message}`);
         }

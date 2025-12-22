@@ -8,18 +8,18 @@ const execAsync = promisify(exec);
 
 /**
  * CursorAuth - Simple browser-based authentication for Cursor Agent
- * 
+ *
  * Uses the `cursor-agent` CLI for authentication:
  * - `cursor-agent login` - Opens browser for OAuth login
  * - `cursor-agent status` - Checks if user is authenticated
  * - `cursor-agent logout` - Clears authentication
- * 
+ *
  * No manual token copying required!
  */
 export class CursorAuth implements IAuthProvider {
     public readonly type = AuthProviderType.Cursor;
 
-    constructor(private readonly secretManager: SecretManager) { }
+    constructor(private readonly secretManager: SecretManager) {}
 
     /**
      * Login using browser-based OAuth flow
@@ -34,90 +34,98 @@ export class CursorAuth implements IAuthProvider {
         }
 
         // Show progress while opening browser
-        return await vscode.window.withProgress({
-            location: vscode.ProgressLocation.Notification,
-            title: "Cursor Login",
-            cancellable: true
-        }, async (progress, token) => {
-            progress.report({ message: "Opening browser for login..." });
+        return await vscode.window.withProgress(
+            {
+                location: vscode.ProgressLocation.Notification,
+                title: 'Cursor Login',
+                cancellable: true
+            },
+            async (progress, token) => {
+                progress.report({ message: 'Opening browser for login...' });
 
-            try {
-                // Run cursor-agent login - opens browser automatically
-                const loginProcess = spawn('cursor-agent', ['login'], {
-                    stdio: 'pipe',
-                    shell: true
-                });
+                try {
+                    // Run cursor-agent login - opens browser automatically
+                    const loginProcess = spawn('cursor-agent', ['login'], {
+                        stdio: 'pipe',
+                        shell: true
+                    });
 
-                // Wait for login to complete or timeout
-                const result = await new Promise<boolean>((resolve, reject) => {
-                    let output = '';
+                    // Wait for login to complete or timeout
+                    const result = await new Promise<boolean>((resolve, reject) => {
+                        let output = '';
 
-                    loginProcess.stdout?.on('data', (data) => {
-                        output += data.toString();
-                        // Update progress with output
-                        if (output.includes('browser')) {
-                            progress.report({ message: "Waiting for browser authentication..." });
+                        loginProcess.stdout?.on('data', (data) => {
+                            output += data.toString();
+                            // Update progress with output
+                            if (output.includes('browser')) {
+                                progress.report({ message: 'Waiting for browser authentication...' });
+                            }
+                        });
+
+                        loginProcess.stderr?.on('data', (data) => {
+                            output += data.toString();
+                        });
+
+                        loginProcess.on('close', (code) => {
+                            if (code === 0) {
+                                resolve(true);
+                            } else {
+                                reject(new Error(`Login failed: ${output}`));
+                            }
+                        });
+
+                        loginProcess.on('error', (err) => {
+                            reject(
+                                new Error(`Failed to start cursor-agent: ${err.message}. Is cursor-agent installed?`)
+                            );
+                        });
+
+                        // Handle cancellation
+                        token.onCancellationRequested(() => {
+                            loginProcess.kill();
+                            reject(new Error('Login cancelled'));
+                        });
+
+                        // Timeout after 5 minutes
+                        setTimeout(
+                            () => {
+                                loginProcess.kill();
+                                reject(new Error('Login timed out'));
+                            },
+                            5 * 60 * 1000
+                        );
+                    });
+
+                    if (result) {
+                        // Verify login worked
+                        const session = await this.checkCLIAuth();
+                        if (session) {
+                            vscode.window.showInformationMessage('✅ Successfully logged in to Cursor!');
+                            return session;
                         }
-                    });
+                    }
 
-                    loginProcess.stderr?.on('data', (data) => {
-                        output += data.toString();
-                    });
+                    throw new Error('Login verification failed');
+                } catch (error: any) {
+                    // If cursor-agent is not installed, offer alternative
+                    if (error.message?.includes('cursor-agent') || error.message?.includes('not found')) {
+                        const choice = await vscode.window.showErrorMessage(
+                            'cursor-agent CLI not found. Would you like to enter an API key instead?',
+                            'Enter API Key',
+                            'Install cursor-agent',
+                            'Cancel'
+                        );
 
-                    loginProcess.on('close', (code) => {
-                        if (code === 0) {
-                            resolve(true);
-                        } else {
-                            reject(new Error(`Login failed: ${output}`));
+                        if (choice === 'Enter API Key') {
+                            return this.loginWithApiKey();
+                        } else if (choice === 'Install cursor-agent') {
+                            vscode.env.openExternal(vscode.Uri.parse('https://cursor.com/docs/cli/installation'));
                         }
-                    });
-
-                    loginProcess.on('error', (err) => {
-                        reject(new Error(`Failed to start cursor-agent: ${err.message}. Is cursor-agent installed?`));
-                    });
-
-                    // Handle cancellation
-                    token.onCancellationRequested(() => {
-                        loginProcess.kill();
-                        reject(new Error('Login cancelled'));
-                    });
-
-                    // Timeout after 5 minutes
-                    setTimeout(() => {
-                        loginProcess.kill();
-                        reject(new Error('Login timed out'));
-                    }, 5 * 60 * 1000);
-                });
-
-                if (result) {
-                    // Verify login worked
-                    const session = await this.checkCLIAuth();
-                    if (session) {
-                        vscode.window.showInformationMessage('✅ Successfully logged in to Cursor!');
-                        return session;
                     }
+                    throw error;
                 }
-
-                throw new Error('Login verification failed');
-            } catch (error: any) {
-                // If cursor-agent is not installed, offer alternative
-                if (error.message?.includes('cursor-agent') || error.message?.includes('not found')) {
-                    const choice = await vscode.window.showErrorMessage(
-                        'cursor-agent CLI not found. Would you like to enter an API key instead?',
-                        'Enter API Key',
-                        'Install cursor-agent',
-                        'Cancel'
-                    );
-
-                    if (choice === 'Enter API Key') {
-                        return this.loginWithApiKey();
-                    } else if (choice === 'Install cursor-agent') {
-                        vscode.env.openExternal(vscode.Uri.parse('https://cursor.com/docs/cli/installation'));
-                    }
-                }
-                throw error;
             }
-        });
+        );
     }
 
     /**
@@ -188,11 +196,12 @@ export class CursorAuth implements IAuthProvider {
             // Parse the status output to check if authenticated
             const output = stdout.toLowerCase();
 
-            if (output.includes('authenticated') ||
+            if (
+                output.includes('authenticated') ||
                 output.includes('logged in') ||
                 output.includes('status: ok') ||
-                (output.includes('user') && !output.includes('not authenticated'))) {
-
+                (output.includes('user') && !output.includes('not authenticated'))
+            ) {
                 // Extract user info if available
                 const emailMatch = stdout.match(/email[:\s]+([^\s\n]+)/i);
                 const userMatch = stdout.match(/user[:\s]+([^\s\n]+)/i);

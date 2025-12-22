@@ -1,16 +1,15 @@
 import * as vscode from 'vscode';
 import * as fs from 'fs';
-import * as path from 'path';
 import { OpusFlowWrapper } from '../cli/opusflowWrapper';
 import { WorkflowWebview } from '../ui/workflowWebview';
 
 export class PlanCommands {
-    constructor(private cli: OpusFlowWrapper) { }
+    constructor(private cli: OpusFlowWrapper) {}
 
-    public async createPlan(context: vscode.ExtensionContext) {
+    public async createPlan(_context: vscode.ExtensionContext) {
         const title = await vscode.window.showInputBox({
             prompt: 'Enter plan title',
-            placeHolder: 'e.g., Add user authentication'
+            placeHolder: 'e.g., Implement user authentication with OAuth2'
         });
 
         if (!title) return;
@@ -35,7 +34,6 @@ export class PlanCommands {
             WorkflowWebview._currentPanel?.updatePlan(content);
             // @ts-ignore
             WorkflowWebview._currentPanel?.switchTab('planning');
-
         } catch (error: any) {
             vscode.window.showErrorMessage(`Failed to create plan: ${error.message}`);
         }

@@ -2,7 +2,7 @@ import * as vscode from 'vscode';
 
 /**
  * Simple API key management for AI coding agents
- * 
+ *
  * Supported agents:
  * Supported agents:
  * - Gemini CLI: Uses GEMINI_API_KEY
@@ -66,10 +66,9 @@ export class AgentAuth {
         }
 
         // Open console URL
-        const openConsole = await vscode.window.showQuickPick(
-            ['Enter API Key', 'Open Console to Get Key'],
-            { placeHolder: `Configure ${selected.label}` }
-        );
+        const openConsole = await vscode.window.showQuickPick(['Enter API Key', 'Open Console to Get Key'], {
+            placeHolder: `Configure ${selected.label}`
+        });
 
         if (openConsole === 'Open Console to Get Key') {
             vscode.env.openExternal(vscode.Uri.parse(selected.url));
@@ -97,7 +96,7 @@ export class AgentAuth {
      */
     async showStatus(): Promise<void> {
         const status = this.getStatus();
-        const items = status.map(s => ({
+        const items = status.map((s) => ({
             label: s.configured ? `✅ ${s.agent}` : `❌ ${s.agent}`,
             description: s.envVar,
             detail: s.configured ? 'Configured' : 'Not configured - click to setup'

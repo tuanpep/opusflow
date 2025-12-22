@@ -5,7 +5,7 @@ import { OpusFlowWrapper } from '../cli/opusflowWrapper';
 import { WorkflowWebview } from '../ui/workflowWebview';
 
 export class VerifyCommands {
-    constructor(private cli: OpusFlowWrapper) { }
+    constructor(private cli: OpusFlowWrapper) {}
 
     public async verifyPlan(item?: any) {
         let planFile: string | undefined;

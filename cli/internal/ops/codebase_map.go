@@ -67,7 +67,7 @@ var languageExtensions = map[string]string{
 }
 
 // GenerateCodebaseMap generates a compressed map of the codebase
-func GenerateCodebaseMap(rootDir string, includePatterns, excludePatterns []string) (*ProjectMap, error) {
+func GenerateCodebaseMap(rootDir string, includePatterns, excludePatterns []string, maxFiles int) (*ProjectMap, error) {
 	root, err := manager.FindProjectRoot()
 	if err != nil {
 		return nil, fmt.Errorf("failed to find project root: %w", err)
@@ -89,21 +89,35 @@ func GenerateCodebaseMap(rootDir string, includePatterns, excludePatterns []stri
 	}
 
 	languageSet := make(map[string]bool)
+	ignoreHandler := NewIgnoreHandler(root)
 
 	err = filepath.Walk(rootDir, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
 			return nil // Skip files we can't access
 		}
 
-		// Skip directories
+		// Check limits
+		if maxFiles > 0 && pm.Statistics.TotalFiles >= maxFiles {
+			// If we reached the limit, we stop.
+			// But Walk doesn't support easy "stop global walk" without error.
+			// We can return a special error or just skip everything else?
+			// Returning error is cleaner to break immediately.
+			return fmt.Errorf("max files limit reached")
+		}
+
+		// Track directory
 		if info.IsDir() {
-			// Skip common ignored directories
-			name := info.Name()
-			if name == ".git" || name == "node_modules" || name == "vendor" ||
-				name == "__pycache__" || name == ".vscode" || name == "dist" ||
-				name == "build" || name == ".idea" {
+			ignoreHandler.TrackDirectory(path)
+		}
+
+		if ignoreHandler.ShouldIgnore(path, info.IsDir()) {
+			if info.IsDir() {
 				return filepath.SkipDir
 			}
+			return nil
+		}
+
+		if info.IsDir() {
 			return nil
 		}
 
@@ -146,7 +160,7 @@ func GenerateCodebaseMap(rootDir string, includePatterns, excludePatterns []stri
 		return nil
 	})
 
-	if err != nil {
+	if err != nil && err.Error() != "max files limit reached" {
 		return nil, fmt.Errorf("failed to walk directory: %w", err)
 	}
 
@@ -387,7 +401,6 @@ var (
 	tsInterfacePattern = regexp.MustCompile(`(?m)^(?:export\s+)?interface\s+(\w+)`)
 	tsTypePattern      = regexp.MustCompile(`(?m)^(?:export\s+)?type\s+(\w+)\s*=`)
 	tsConstPattern     = regexp.MustCompile(`(?m)^(?:export\s+)?const\s+(\w+)\s*[=:]`)
-	tsMethodPattern    = regexp.MustCompile(`(?m)^\s+(?:async\s+)?(\w+)\s*\([^)]*\)\s*[:{]`)
 )
 
 // extractTSSymbols extracts symbols from TypeScript/JavaScript using regex
@@ -605,6 +618,60 @@ func (pm *ProjectMap) FormatSummary() string {
 			}
 			sb.WriteString(fmt.Sprintf("  %s.%s (%s)\n", filepath.Base(f.Path), sym.Name, sym.Kind))
 			count++
+		}
+	}
+
+	return sb.String()
+}
+
+// FormatCompactMarkdown returns a compact markdown format (no children)
+func (pm *ProjectMap) FormatCompactMarkdown() string {
+	var sb strings.Builder
+
+	sb.WriteString(fmt.Sprintf("# Project: %s (Compact)\n\n", filepath.Base(pm.RootPath)))
+	sb.WriteString(fmt.Sprintf("**Languages**: %s\n", strings.Join(pm.Languages, ", ")))
+	sb.WriteString(fmt.Sprintf("**Files**: %d | **Lines**: %d | **Symbols**: %d\n\n",
+		pm.Statistics.TotalFiles, pm.Statistics.TotalLines, pm.Statistics.TotalSymbols))
+
+	sb.WriteString("---\n\n")
+
+	// Group files by directory
+	dirFiles := make(map[string][]FileSymbols)
+	for _, f := range pm.Files {
+		dir := filepath.Dir(f.Path)
+		if dir == "." {
+			dir = "/"
+		}
+		dirFiles[dir] = append(dirFiles[dir], f)
+	}
+
+	// Sort directories
+	var dirs []string
+	for d := range dirFiles {
+		dirs = append(dirs, d)
+	}
+	sort.Strings(dirs)
+
+	for _, dir := range dirs {
+		files := dirFiles[dir]
+		sb.WriteString(fmt.Sprintf("## %s\n\n", dir))
+
+		for _, f := range files {
+			if len(f.Symbols) == 0 {
+				continue
+			}
+
+			sb.WriteString(fmt.Sprintf("### %s (%d lines)\n\n", filepath.Base(f.Path), f.LineCount))
+
+			for _, sym := range f.Symbols {
+				if sym.Signature != "" {
+					sb.WriteString(fmt.Sprintf("- `%s` :%d\n", sym.Signature, sym.StartLine))
+				} else {
+					sb.WriteString(fmt.Sprintf("- `%s %s` :%d\n", sym.Kind, sym.Name, sym.StartLine))
+				}
+				// Skip children in compact mode
+			}
+			sb.WriteString("\n")
 		}
 	}
 

@@ -1,0 +1,219 @@
+# golangci-lint configuration file
+# See https://golangci-lint.run/usage/configuration/ for more details
+
+run:
+  # Timeout for analysis
+  timeout: 5m
+  
+  # Include test files in linting
+  tests: true
+
+# Output configuration
+output:
+  formats:
+    - format: colored-line-number
+  print-issued-lines: true
+  print-linter-name: true
+
+# Linters configuration
+linters:
+  # Enable specific linters
+  enable:
+    - gofmt          # Checks code formatting
+    - goimports      # Checks import formatting
+    - govet          # Reports suspicious constructs
+    - errcheck       # Checks for unchecked errors
+    - staticcheck    # Static analysis
+    - unused         # Checks for unused code
+    - gosimple       # Simplifies code
+    - ineffassign    # Detects ineffectual assignments
+    - typecheck      # Like the front-end of a Go compiler
+    - goconst        # Finds repeated strings that could be replaced by a constant
+    - gocritic       # The most opinionated Go linter
+    - goheader       # Checks that file headers match the configured pattern
+    - gosec          # Inspects source code for security problems
+    - misspell       # Finds commonly misspelled English words
+    - unparam        # Reports unused function parameters
+    - unconvert      # Remove unnecessary type conversions
+    - prealloc       # Finds slice declarations that could potentially be pre-allocated
+    - copyloopvar    # Checks for pointers to enclosing loop variables (Go 1.22+)
+    - gocognit       # Computes and checks the cognitive complexity of functions
+    - dupl           # Tool for code clone detection
+    - funlen         # Tool for detection of long functions
+    - gochecknoinits # Checks that no init functions are used
+    - gochecknoglobals # Checks that no global variables are used
+    - gofumpt        # Stricter gofmt
+    - revive         # Fast, configurable, extensible linter for Go
+    - stylecheck     # Style linter, similar to golint
+    - thelper        # Detects test helpers without t.Helper() call
+
+  # Disable specific linters (if needed)
+  disable:
+    - lll            # Line length linter (can be too strict)
+
+# Linters settings
+linters-settings:
+  gofmt:
+    simplify: true
+  
+  goimports:
+    local-prefixes: github.com/tuanpep/oplusflow
+  
+  govet:
+    enable-all: true
+  
+  shadow:
+    strict: false
+  
+  errcheck:
+    check-type-assertions: true
+    check-blank: true
+    exclude-functions:
+      - fmt:.*
+      - io/ioutil:^Read.*
+  
+  staticcheck:
+    checks: ["all"]
+  
+  unused:
+    check-exported: false  # Don't check exported functions (they might be used externally)
+  
+  gocritic:
+    enabled-tags:
+      - diagnostic
+      - experimental
+      - opinionated
+      - performance
+      - style
+    disabled-checks:
+      - dupImport # Can be too strict
+      - ifElseChain # Can be too strict
+      - octalLiteral # Can be too strict
+      - whyNoLint # Can be too strict
+  
+  gosec:
+    severity: medium
+    confidence: medium
+    excludes:
+      - G104  # Errors unhandled (we use errcheck for this)
+      - G307  # Deferring a method which returns an error
+  
+  funlen:
+    lines: 100
+    statements: 50
+  
+  gocognit:
+    min-complexity: 15
+  
+  dupl:
+    threshold: 100
+  
+  revive:
+    rules:
+      - name: exported
+        severity: warning
+      - name: var-naming
+        severity: warning
+      - name: var-declaration
+        severity: warning
+      - name: package-comments
+        severity: warning
+      - name: range
+        severity: warning
+      - name: increment-decrement
+        severity: warning
+      - name: error-return
+        severity: warning
+      - name: error-strings
+        severity: warning
+      - name: error-naming
+        severity: warning
+      - name: if-return
+        severity: warning
+      - name: increment-decrement
+        severity: warning
+      - name: var-naming
+        severity: warning
+      - name: range
+        severity: warning
+      - name: range-val-in-closure
+        severity: warning
+      - name: range-val-address
+        severity: warning
+      - name: waitgroup-by-value
+        severity: warning
+      - name: atomic
+        severity: warning
+      - name: empty-lines
+        severity: warning
+
+# Issues configuration
+issues:
+  # Maximum issues count per one linter
+  max-issues-per-linter: 0
+  
+  # Maximum count of issues with the same text
+  max-same-issues: 0
+  
+  # Show only new issues created after git revision
+  new: false
+  
+  # Exclude some linters from exclude rules
+  exclude-rules:
+    # Exclude some linters from exclude rules
+    - path: _test\.go
+      linters:
+        - errcheck
+        - funlen
+        - gocognit
+        - goconst
+        - gocritic
+        - gosec
+        - dupl
+        - gofumpt
+      text: ".*"
+    
+    # Exclude known linter issues
+    - text: "Error return value of .((os\\.)?std(out|err)\\..*|.*Close|.*Flush|os\\.Remove(All)?|.*printf?|os\\.(Un)?Setenv). is not checked"
+      linters:
+        - errcheck
+      source: "^exit"
+    
+    # Exclude issues about unused parameters in interface implementations
+    - text: "parameter .* always receives"
+      linters:
+        - unparam
+    
+    # Exclude issues about exported functions without comments (can be too strict)
+    - text: "exported (function|method|type|const|var) .* should have comment"
+      linters:
+        - revive
+      severity: warning
+
+  # Exclude some issues
+  exclude:
+    # Exclude some linters from exclude rules
+    - "Error return value of .((os\\.)?std(out|err)\\..*|.*Close|.*Flush|os\\.Remove(All)?|.*printf?|os\\.(Un)?Setenv). is not checked"
+    - "exported function .* should have comment or be unexported"
+    - "package comment should be of the form"
+    - "comment on exported.*should be of the form"
+
+  # Exclude directories
+  exclude-dirs:
+    - bin
+    - vendor
+  
+  # Exclude files
+  exclude-files:
+    - ".*\\.pb\\.go$"
+    - ".*\\.gen\\.go$"
+
+# Severity configuration
+severity:
+  default-severity: error
+  case-sensitive: false
+  rules:
+    - linters:
+        - revive
+      severity: warning
+

@@ -97,7 +97,7 @@ export class OutputParser {
 
             return {
                 fullPath: pathMatch[1].trim(),
-                status: statusMatch ? statusMatch[2].toLowerCase() as 'passed' | 'failed' | 'partial' : undefined,
+                status: statusMatch ? (statusMatch[2].toLowerCase() as 'passed' | 'failed' | 'partial') : undefined,
                 checksPassed: checksMatch ? parseInt(checksMatch[1]) : undefined,
                 checksTotal: checksMatch ? parseInt(checksMatch[2]) : undefined
             };
@@ -141,7 +141,7 @@ export class OutputParser {
             content: stdout,
             filesCount: filesMatch ? parseInt(filesMatch[1]) : 0,
             symbolsCount: symbolsMatch ? parseInt(symbolsMatch[1]) : 0,
-            languages: languagesMatch ? languagesMatch[1].split(', ').map(l => l.trim()) : []
+            languages: languagesMatch ? languagesMatch[1].split(', ').map((l) => l.trim()) : []
         };
     }
 
@@ -187,12 +187,14 @@ export class OutputParser {
         const titleMatch = stdout.match(/# (?:Next Task|Execute Task): (.+)/);
 
         return {
-            task: idMatch ? {
-                id: idMatch[1],
-                title: titleMatch ? titleMatch[1].trim() : '',
-                status: 'pending',
-                files: []
-            } : null,
+            task: idMatch
+                ? {
+                      id: idMatch[1],
+                      title: titleMatch ? titleMatch[1].trim() : '',
+                      status: 'pending',
+                      files: []
+                  }
+                : null,
             prompt: stdout,
             allCompleted: false
         };
@@ -236,7 +238,8 @@ export class OutputParser {
             agents.push({
                 name: match[1],
                 available,
-                installCommand: !available && installMatch ? installMatch[0].replace('Install: `', '').replace('`', '') : undefined
+                installCommand:
+                    !available && installMatch ? installMatch[0].replace('Install: `', '').replace('`', '') : undefined
             });
         }
 

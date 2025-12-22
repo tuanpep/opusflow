@@ -62,9 +62,7 @@ export function activate(context: vscode.ExtensionContext) {
 
     // Initialize Sidebar
     const sidebarProvider = new SidebarProvider(context.extensionUri, authManager);
-    context.subscriptions.push(
-        vscode.window.registerWebviewViewProvider(SidebarProvider.viewType, sidebarProvider)
-    );
+    context.subscriptions.push(vscode.window.registerWebviewViewProvider(SidebarProvider.viewType, sidebarProvider));
 
     // Store extension context
     const extensionContext: OpusFlowExtensionContext = {
@@ -82,9 +80,6 @@ export function activate(context: vscode.ExtensionContext) {
     // Initialize Tree View
     const explorerProvider = new OpusFlowExplorerProvider(fileWatcher);
     vscode.window.registerTreeDataProvider('opusflowExplorer', explorerProvider);
-
-
-
 
     // Set initial agent
     if (extensionContext.currentAgent) {
@@ -106,10 +101,7 @@ export function deactivate() {
 }
 
 function createStatusBarItem(): vscode.StatusBarItem {
-    const statusBarItem = vscode.window.createStatusBarItem(
-        vscode.StatusBarAlignment.Left,
-        100
-    );
+    const statusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 100);
 
     statusBarItem.text = '$(rocket) OpusFlow';
     statusBarItem.tooltip = 'OpusFlow: Spec-Driven Development';
@@ -134,107 +126,93 @@ function registerCommands(
     // ============ Original Commands ============
 
     // Create Plan command
-    const createPlanCmd = vscode.commands.registerCommand(
-        'opusflow.createPlan',
-        () => planHandlers.createPlan(context)
+    const createPlanCmd = vscode.commands.registerCommand('opusflow.createPlan', () =>
+        planHandlers.createPlan(context)
     );
 
     // Verify Plan command
-    const verifyPlanCmd = vscode.commands.registerCommand(
-        'opusflow.verifyPlan',
-        (item?: any) => verifyHandlers.verifyPlan(item)
+    const verifyPlanCmd = vscode.commands.registerCommand('opusflow.verifyPlan', (item?: any) =>
+        verifyHandlers.verifyPlan(item)
     );
 
     // Execute Workflow command
-    const executeWorkflowCmd = vscode.commands.registerCommand(
-        'opusflow.executeWorkflow',
-        async (item?: any) => {
-            let planFile = item?.label;
-            if (!planFile) {
-                const activeEditor = vscode.window.activeTextEditor;
-                if (activeEditor?.document.fileName.includes('opusflow-planning/plans')) {
-                    planFile = path.basename(activeEditor.document.fileName);
-                }
-            }
-            if (planFile) {
-                await agentHandlers.executeWorkflow(planFile);
-            } else {
-                vscode.window.showErrorMessage('Please select a plan file to execute.');
+    const executeWorkflowCmd = vscode.commands.registerCommand('opusflow.executeWorkflow', async (item?: any) => {
+        let planFile = item?.label;
+        if (!planFile) {
+            const activeEditor = vscode.window.activeTextEditor;
+            if (activeEditor?.document.fileName.includes('opusflow-planning/plans')) {
+                planFile = path.basename(activeEditor.document.fileName);
             }
         }
-    );
+        if (planFile) {
+            await agentHandlers.executeWorkflow(planFile);
+        } else {
+            vscode.window.showErrorMessage('Please select a plan file to execute.');
+        }
+    });
 
     // Open Workflow Panel command
-    const openWorkflowCmd = vscode.commands.registerCommand(
-        'opusflow.openWorkflow',
-        () => {
-            extensionContext.webviewProvider.showWorkflow();
-        }
-    );
+    const openWorkflowCmd = vscode.commands.registerCommand('opusflow.openWorkflow', () => {
+        extensionContext.webviewProvider.showWorkflow();
+    });
 
     // Refresh Explorer command
-    const refreshExplorerCmd = vscode.commands.registerCommand(
-        'opusflow.refreshExplorer',
-        () => explorerProvider.refresh()
+    const refreshExplorerCmd = vscode.commands.registerCommand('opusflow.refreshExplorer', () =>
+        explorerProvider.refresh()
     );
 
     // Select Agent command
-    const selectAgentCmd = vscode.commands.registerCommand(
-        'opusflow.selectAgent',
-        async (agentId?: string) => {
-            // If agent passed directly (e.g. from Sidebar), use it
-            if (agentId) {
-                // Validate agentId
-                const validAgents = ['prompt', 'gemini', 'cursor'];
-                if (validAgents.includes(agentId)) { // Allow loose matching or strict? 
-                    // Update state
-                    extensionContext.currentAgent = agentId;
-                    extensionContext.statusBarItem.text = `$(rocket) OpusFlow [${agentId}]`;
-                    extensionContext.outputChannel.appendLine(`Selected agent: ${agentId}`);
-                    // Update sidebar UI
-                    extensionContext.authSidebarProvider.setAgent(agentId);
-
-                    // Update Main Sidebar UI
-                    extensionContext.sidebarProvider.updateAgentStatus(agentId, false); // Default to false until we check connection, or check it here
-
-                    vscode.window.showInformationMessage(`Selected agent: ${agentId}`);
-                    return;
-                }
-            }
-
-            const authStatuses = await extensionContext.authManager.checkSessions();
-
-            const agents = [
-                { label: 'gemini', description: 'Gemini CLI' },
-                { label: 'cursor', description: 'Cursor Agent' },
-                { label: 'prompt', description: 'Generate prompt only' },
-            ];
-
-            const selected = await vscode.window.showQuickPick(agents, {
-                placeHolder: 'Select AI agent'
-            });
-
-            if (selected) {
-                const agent = selected.label;
-                extensionContext.currentAgent = agent;
-                extensionContext.statusBarItem.text = `$(rocket) OpusFlow [${agent}]`;
-                extensionContext.outputChannel.appendLine(`Selected agent: ${agent}`);
-
+    const selectAgentCmd = vscode.commands.registerCommand('opusflow.selectAgent', async (agentId?: string) => {
+        // If agent passed directly (e.g. from Sidebar), use it
+        if (agentId) {
+            // Validate agentId
+            const validAgents = ['prompt', 'gemini', 'cursor'];
+            if (validAgents.includes(agentId)) {
+                // Allow loose matching or strict?
+                // Update state
+                extensionContext.currentAgent = agentId;
+                extensionContext.statusBarItem.text = `$(rocket) OpusFlow [${agentId}]`;
+                extensionContext.outputChannel.appendLine(`Selected agent: ${agentId}`);
                 // Update sidebar UI
-                extensionContext.authSidebarProvider.setAgent(agent);
+                extensionContext.authSidebarProvider.setAgent(agentId);
 
-                vscode.window.showInformationMessage(`Selected agent: ${agent}`);
+                // Update Main Sidebar UI
+                extensionContext.sidebarProvider.updateAgentStatus(agentId, false); // Default to false until we check connection, or check it here
+
+                vscode.window.showInformationMessage(`Selected agent: ${agentId}`);
+                return;
             }
         }
-    );
+
+        const authStatuses = await extensionContext.authManager.checkSessions();
+
+        const agents = [
+            { label: 'gemini', description: 'Gemini CLI' },
+            { label: 'cursor', description: 'Cursor Agent' },
+            { label: 'prompt', description: 'Generate prompt only' }
+        ];
+
+        const selected = await vscode.window.showQuickPick(agents, {
+            placeHolder: 'Select AI agent'
+        });
+
+        if (selected) {
+            const agent = selected.label;
+            extensionContext.currentAgent = agent;
+            extensionContext.statusBarItem.text = `$(rocket) OpusFlow [${agent}]`;
+            extensionContext.outputChannel.appendLine(`Selected agent: ${agent}`);
+
+            // Update sidebar UI
+            extensionContext.authSidebarProvider.setAgent(agent);
+
+            vscode.window.showInformationMessage(`Selected agent: ${agent}`);
+        }
+    });
 
     // Authenticate Agent command
-    const authenticateAgentCmd = vscode.commands.registerCommand(
-        'opusflow.authenticateAgent',
-        () => {
-            vscode.commands.executeCommand('opusflowChat.focus');
-        }
-    );
+    const authenticateAgentCmd = vscode.commands.registerCommand('opusflow.authenticateAgent', () => {
+        vscode.commands.executeCommand('opusflowChat.focus');
+    });
 
     // Copy Verification Prompt command
     const copyVerificationPromptCmd = vscode.commands.registerCommand(
@@ -254,65 +232,51 @@ function registerCommands(
     // ============ New SDD Commands ============
 
     // Generate Codebase Map
-    const generateMapCmd = vscode.commands.registerCommand(
-        'opusflow.generateMap',
-        () => specHandlers.generateMap()
-    );
+    const generateMapCmd = vscode.commands.registerCommand('opusflow.generateMap', () => specHandlers.generateMap());
 
     // Create Specification
-    const createSpecCmd = vscode.commands.registerCommand(
-        'opusflow.createSpec',
-        () => specHandlers.createSpec(context)
+    const createSpecCmd = vscode.commands.registerCommand('opusflow.createSpec', () =>
+        specHandlers.createSpec(context)
     );
 
     // Decompose Plan
-    const decomposePlanCmd = vscode.commands.registerCommand(
-        'opusflow.decomposePlan',
-        (item?: any) => taskHandlers.decomposePlan(item)
+    const decomposePlanCmd = vscode.commands.registerCommand('opusflow.decomposePlan', (item?: any) =>
+        taskHandlers.decomposePlan(item)
     );
 
     // Get Next Task
-    const nextTaskCmd = vscode.commands.registerCommand(
-        'opusflow.nextTask',
-        (item?: any) => taskHandlers.nextTask(item)
+    const nextTaskCmd = vscode.commands.registerCommand('opusflow.nextTask', (item?: any) =>
+        taskHandlers.nextTask(item)
     );
 
     // Complete Task
-    const completeTaskCmd = vscode.commands.registerCommand(
-        'opusflow.completeTask',
-        (item?: any) => taskHandlers.completeTask(item)
+    const completeTaskCmd = vscode.commands.registerCommand('opusflow.completeTask', (item?: any) =>
+        taskHandlers.completeTask(item)
     );
 
     // Execute Task
-    const execTaskCmd = vscode.commands.registerCommand(
-        'opusflow.execTask',
-        (item?: any) => taskHandlers.execTask(item)
+    const execTaskCmd = vscode.commands.registerCommand('opusflow.execTask', (item?: any) =>
+        taskHandlers.execTask(item)
     );
 
     // Workflow Status
-    const workflowStatusCmd = vscode.commands.registerCommand(
-        'opusflow.workflowStatus',
-        () => workflowHandlers.showStatus()
+    const workflowStatusCmd = vscode.commands.registerCommand('opusflow.workflowStatus', () =>
+        workflowHandlers.showStatus()
     );
 
     // Workflow Start
-    const workflowStartCmd = vscode.commands.registerCommand(
-        'opusflow.workflowStart',
-        () => workflowHandlers.startWorkflow()
+    const workflowStartCmd = vscode.commands.registerCommand('opusflow.workflowStart', () =>
+        workflowHandlers.startWorkflow()
     );
 
     // Workflow Next
-    const workflowNextCmd = vscode.commands.registerCommand(
-        'opusflow.workflowNext',
-        () => workflowHandlers.showNextGuidance()
+    const workflowNextCmd = vscode.commands.registerCommand('opusflow.workflowNext', () =>
+        workflowHandlers.showNextGuidance()
     );
 
     // Setup API Keys command
     const agentAuth = new AgentAuth(context);
-    const setupApiKeysCmd = vscode.commands.registerCommand(
-        'opusflow.setupApiKeys',
-        () => agentAuth.setupApiKeys()
-    );
+    const setupApiKeysCmd = vscode.commands.registerCommand('opusflow.setupApiKeys', () => agentAuth.setupApiKeys());
 
     // Add all commands to subscriptions for cleanup
     context.subscriptions.push(

@@ -1,56 +1,56 @@
-import * as vscode from "vscode";
-import * as fs from "fs";
-import * as path from "path";
-import { AuthManager } from "./auth/authManager";
-import { AuthProviderType } from "./auth/types";
+import * as vscode from 'vscode';
+import * as fs from 'fs';
+import * as path from 'path';
+import { AuthManager } from './auth/authManager';
+import { AuthProviderType } from './auth/types';
 
 export class SidebarProvider implements vscode.WebviewViewProvider {
-    public static readonly viewType = "opusflowChat";
+    public static readonly viewType = 'opusflowChat';
     private _view?: vscode.WebviewView;
 
     constructor(
         private readonly _extensionUri: vscode.Uri,
         private readonly _authManager: AuthManager
-    ) { }
+    ) {}
 
     public resolveWebviewView(
         webviewView: vscode.WebviewView,
-        context: vscode.WebviewViewResolveContext,
+        _context: vscode.WebviewViewResolveContext,
         _token: vscode.CancellationToken
     ) {
         this._view = webviewView;
 
         webviewView.webview.options = {
             enableScripts: true,
-            localResourceRoots: [this._extensionUri],
+            localResourceRoots: [this._extensionUri]
         };
 
         // Initialize with HTML
         webviewView.webview.html = this._getHtmlForWebview(webviewView.webview);
 
         // Send initial state once the view is ready (or just send it now, webview might miss it if not ready, but we can retry or inject in HTML)
-        // Better: Inject in HTML or listen for "ready" message. 
+        // Better: Inject in HTML or listen for "ready" message.
         // For now, I'll rely on the view sending a "ready" message or just injecting it.
         // Let's inject it via replacement in _getHtmlForWebview.
 
         // Handle messages from the webview
         webviewView.webview.onDidReceiveMessage(async (data) => {
             switch (data.type) {
-                case "onInfo": {
+                case 'onInfo': {
                     if (!data.value) return;
                     vscode.window.showInformationMessage(data.value);
                     break;
                 }
-                case "onError": {
+                case 'onError': {
                     if (!data.value) return;
                     vscode.window.showErrorMessage(data.value);
                     break;
                 }
-                case "savePlan": {
+                case 'savePlan': {
                     await this._savePlan(data.value);
                     break;
                 }
-                case "login": {
+                case 'login': {
                     try {
                         const provider = data.value as AuthProviderType;
                         await this._authManager.login(provider);
@@ -61,7 +61,7 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
                     }
                     break;
                 }
-                case "logout": {
+                case 'logout': {
                     try {
                         const provider = data.value as AuthProviderType;
                         await this._authManager.logout(provider);
@@ -72,31 +72,31 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
                     }
                     break;
                 }
-                case "refreshAuth": {
+                case 'refreshAuth': {
                     await this._updateWebviewState();
                     break;
                 }
-                case "searchFiles": {
+                case 'searchFiles': {
                     await this._handleFileSearch(data.value);
                     break;
                 }
-                case "chat": {
+                case 'chat': {
                     await this._handleChatMessage(data.value);
                     break;
                 }
-                case "webviewLoaded": {
+                case 'webviewLoaded': {
                     await this._updateWebviewState();
                     break;
                 }
-                case "startWorkflow": {
+                case 'startWorkflow': {
                     await this._handleStartWorkflow(data.workflow, data.query, data.context);
                     break;
                 }
-                case "addContext": {
+                case 'addContext': {
                     await this._handleAddContext(data.workflow);
                     break;
                 }
-                case "executeAction": {
+                case 'executeAction': {
                     if (data.command) {
                         try {
                             await vscode.commands.executeCommand(data.command, ...(data.args || []));
@@ -115,10 +115,10 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
         // Search for files matching the query
         // Limit to 20 results for performance in dropdown
         const files = await vscode.workspace.findFiles(`**/*${query}*`, '**/node_modules/**', 20);
-        const filePaths = files.map(f => vscode.workspace.asRelativePath(f));
+        const filePaths = files.map((f) => vscode.workspace.asRelativePath(f));
 
         this._view.webview.postMessage({
-            type: "searchFilesResponse",
+            type: 'searchFilesResponse',
             value: filePaths
         });
     }
@@ -127,14 +127,14 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
         if (!this._view) return;
 
         // 1. Gather Context
-        let contextMsg = "";
+        let contextMsg = '';
 
         // A. Parse @Mentions
         const mentionRegex = /@([\w./-]+)/g;
         const matches = [...userMessage.matchAll(mentionRegex)];
 
         if (matches.length > 0) {
-            contextMsg += "\n\n[Mentioned Files]:";
+            contextMsg += '\n\n[Mentioned Files]:';
             for (const match of matches) {
                 const mention = match[1];
                 // Try to find the file
@@ -145,9 +145,10 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
                     try {
                         const content = (await vscode.workspace.openTextDocument(file)).getText();
                         // Truncate if too large (e.g., 10KB)
-                        const safeContent = content.length > 10000 ? content.substring(0, 10000) + "\n...(truncated)" : content;
+                        const safeContent =
+                            content.length > 10000 ? content.substring(0, 10000) + '\n...(truncated)' : content;
                         contextMsg += `\n\n--- ${relPath} ---\n${safeContent}\n----------------`;
-                    } catch (e) {
+                    } catch (_e) {
                         contextMsg += `\n(Failed to read ${relPath})`;
                     }
                 } else {
@@ -157,7 +158,7 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
         }
 
         // B. Active Editor (fallback if no mentions, or additive? Let's make it additive but lesser priority or just brief)
-        // If user explicitly mentions files, maybe they only want those? 
+        // If user explicitly mentions files, maybe they only want those?
         // Strategy: Always include Active File if it's not already mentioned.
         const activeEditor = vscode.window.activeTextEditor;
         if (activeEditor) {
@@ -169,13 +170,15 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
         }
 
         // Open Files List
-        const openDocs = vscode.workspace.textDocuments.filter(d => d.uri.scheme === 'file').map(d => path.basename(d.fileName));
+        const openDocs = vscode.workspace.textDocuments
+            .filter((d) => d.uri.scheme === 'file')
+            .map((d) => path.basename(d.fileName));
         if (openDocs.length > 0) {
             contextMsg += `\n\n[Open Files]: ${openDocs.join(', ')}`;
         }
 
         // 2. Log Context (for debugging/verification)
-        console.log("Chat Context Gathered:", contextMsg);
+        console.log('Chat Context Gathered:', contextMsg);
 
         // 3. Construct Response (Mock for now, as CLI integration is separate)
         // In a real scenario, we'd send `userMessage + contextMsg` to the LLM agent.
@@ -184,12 +187,12 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
 
         // 4. Send Response
         this._view.webview.postMessage({
-            type: "chatResponse",
+            type: 'chatResponse',
             value: reply
         });
     }
 
-    public async updateAgentStatus(agentId: string, connected: boolean) {
+    public async updateAgentStatus(agentId: string, _connected: boolean) {
         if (!this._view) return;
 
         // We need full auth state + current agent
@@ -214,7 +217,7 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
         }
 
         this._view.webview.postMessage({
-            type: "updateState",
+            type: 'updateState',
             value: {
                 auth: authState
             }
@@ -222,21 +225,21 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
     }
 
     private _getHtmlForWebview(webview: vscode.Webview) {
-        const sidebarHtmlPath = vscode.Uri.joinPath(this._extensionUri, "media", "sidebar.html");
-        const sidebarJsPath = vscode.Uri.joinPath(this._extensionUri, "media", "sidebar.js");
+        const sidebarHtmlPath = vscode.Uri.joinPath(this._extensionUri, 'media', 'sidebar.html');
+        const sidebarJsPath = vscode.Uri.joinPath(this._extensionUri, 'media', 'sidebar.js');
 
         // vscode-elements module path
         const vsceElementsPath = vscode.Uri.joinPath(
             this._extensionUri,
-            "node_modules",
-            "@vscode-elements",
-            "elements",
-            "dist",
-            "bundled.js"
+            'node_modules',
+            '@vscode-elements',
+            'elements',
+            'dist',
+            'bundled.js'
         );
 
         // Load HTML content
-        let htmlContent = fs.readFileSync(sidebarHtmlPath.fsPath, "utf-8");
+        let htmlContent = fs.readFileSync(sidebarHtmlPath.fsPath, 'utf-8');
 
         const scriptUri = webview.asWebviewUri(sidebarJsPath);
         const vsceElementsUri = webview.asWebviewUri(vsceElementsPath);
@@ -271,18 +274,18 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
     private async _savePlan(planData: any) {
         try {
             if (!vscode.workspace.workspaceFolders) {
-                vscode.window.showErrorMessage("No workspace open.");
+                vscode.window.showErrorMessage('No workspace open.');
                 return;
             }
 
             const rootPath = vscode.workspace.workspaceFolders[0].uri.fsPath;
-            const plansDir = path.join(rootPath, "opusflow-planning", "plans");
+            const plansDir = path.join(rootPath, 'opusflow-planning', 'plans');
 
             if (!fs.existsSync(plansDir)) {
                 fs.mkdirSync(plansDir, { recursive: true });
             }
 
-            const sanitizedName = planData.name.toLowerCase().replace(/[^a-z0-9]+/g, "-");
+            const sanitizedName = planData.name.toLowerCase().replace(/[^a-z0-9]+/g, '-');
             const filename = `plan-draft-${sanitizedName}.md`;
             const filePath = path.join(plansDir, filename);
 
@@ -294,7 +297,6 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
 
             const doc = await vscode.workspace.openTextDocument(filePath);
             await vscode.window.showTextDocument(doc);
-
         } catch (e: any) {
             vscode.window.showErrorMessage(`Failed to save plan: ${e.message}`);
         }
@@ -302,7 +304,7 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
 
     private _generateMarkdown(data: any): string {
         let md = `---
-description: ${data.description || "No description provided"}
+description: ${data.description || 'No description provided'}
 ---
 
 # Plan: ${data.name}
@@ -316,16 +318,16 @@ description: ${data.description || "No description provided"}
 
         data.steps.forEach((step: any, index: number) => {
             md += `
-### Step ${index + 1}: ${step.title || "Untitled Step"}
+### Step ${index + 1}: ${step.title || 'Untitled Step'}
 
-**File**: \`${step.file || "TODO"}\`
-**Action**: ${step.action || "Update"}
+**File**: \`${step.file || 'TODO'}\`
+**Action**: ${step.action || 'Update'}
 
-**Purpose**: ${step.purpose || "TODO"}
+**Purpose**: ${step.purpose || 'TODO'}
 
 **Changes**:
-\`\`\`${"text"}
-${step.code || "// Code changes"}
+\`\`\`${'text'}
+${step.code || '// Code changes'}
 \`\`\`
 ---
 `;
@@ -339,22 +341,23 @@ ${step.code || "// Code changes"}
 
         try {
             if (!vscode.workspace.workspaceFolders) {
-                this._sendWorkflowError(workflow, "No workspace open.");
+                this._sendWorkflowError(workflow, 'No workspace open.');
                 return;
             }
 
             const rootPath = vscode.workspace.workspaceFolders[0].uri.fsPath;
 
             // Build context from files
-            let contextContent = "";
+            let contextContent = '';
             for (const filePath of contextFiles) {
                 const fullPath = path.join(rootPath, filePath);
                 if (fs.existsSync(fullPath)) {
                     try {
-                        const content = fs.readFileSync(fullPath, "utf-8");
-                        const truncated = content.length > 5000 ? content.substring(0, 5000) + "\n...(truncated)" : content;
+                        const content = fs.readFileSync(fullPath, 'utf-8');
+                        const truncated =
+                            content.length > 5000 ? content.substring(0, 5000) + '\n...(truncated)' : content;
                         contextContent += `\n\n--- ${filePath} ---\n${truncated}`;
-                    } catch (e) {
+                    } catch (_e) {
                         contextContent += `\n(Could not read ${filePath})`;
                     }
                 }
@@ -362,7 +365,12 @@ ${step.code || "// Code changes"}
 
             // Generate workflow-specific prompt and save
             const timestamp = new Date().toISOString().slice(0, 10);
-            const sanitizedQuery = query.split(' ').slice(0, 5).join('-').toLowerCase().replace(/[^a-z0-9-]/g, '');
+            const sanitizedQuery = query
+                .split(' ')
+                .slice(0, 5)
+                .join('-')
+                .toLowerCase()
+                .replace(/[^a-z0-9-]/g, '');
 
             let outputDir: string;
             let filename: string;
@@ -370,22 +378,22 @@ ${step.code || "// Code changes"}
 
             switch (workflow) {
                 case 'phases':
-                    outputDir = path.join(rootPath, "opusflow-planning", "phases");
+                    outputDir = path.join(rootPath, 'opusflow-planning', 'phases');
                     filename = `phase-${timestamp}-${sanitizedQuery}.md`;
                     promptContent = this._generatePhasesPrompt(query, contextContent);
                     break;
                 case 'plan':
-                    outputDir = path.join(rootPath, "opusflow-planning", "plans");
+                    outputDir = path.join(rootPath, 'opusflow-planning', 'plans');
                     filename = `plan-${timestamp}-${sanitizedQuery}.md`;
                     promptContent = this._generatePlanPrompt(query, contextContent);
                     break;
                 case 'review':
-                    outputDir = path.join(rootPath, "opusflow-planning", "reviews");
+                    outputDir = path.join(rootPath, 'opusflow-planning', 'reviews');
                     filename = `review-${timestamp}-${sanitizedQuery}.md`;
                     promptContent = this._generateReviewPrompt(query, contextContent);
                     break;
                 default:
-                    this._sendWorkflowError(workflow, "Unknown workflow type");
+                    this._sendWorkflowError(workflow, 'Unknown workflow type');
                     return;
             }
 
@@ -410,7 +418,7 @@ status: draft
 ${query}
 
 ## Context Files
-${contextFiles.length > 0 ? contextFiles.map(f => `- ${f}`).join('\n') : 'No context files provided'}
+${contextFiles.length > 0 ? contextFiles.map((f) => `- ${f}`).join('\n') : 'No context files provided'}
 
 ---
 
@@ -427,12 +435,12 @@ ${promptContent}
 
             // Send success response
             this._view.webview.postMessage({
-                type: "workflowResponse",
+                type: 'workflowResponse',
                 workflow: workflow,
                 content: `✅ **${workflow.charAt(0).toUpperCase() + workflow.slice(1)} Draft Created**\n\nFile: \`${filename}\`\n\nI've created a draft with your ${workflow} prompt. Open the file to review and refine it, then hand it off to your AI agent.`,
                 actions: [
-                    { icon: "📄", title: "Open File", command: "vscode.open", args: [vscode.Uri.file(filePath)] },
-                    { icon: "📋", title: "Copy Prompt", command: "opusflow.copyPrompt", args: [filePath] }
+                    { icon: '📄', title: 'Open File', command: 'vscode.open', args: [vscode.Uri.file(filePath)] },
+                    { icon: '📋', title: 'Copy Prompt', command: 'opusflow.copyPrompt', args: [filePath] }
                 ]
             });
 
@@ -442,7 +450,6 @@ ${promptContent}
 
             // Refresh explorer
             vscode.commands.executeCommand('opusflow.refreshExplorer');
-
         } catch (e: any) {
             this._sendWorkflowError(workflow, e.message);
         }
@@ -451,7 +458,7 @@ ${promptContent}
     private _sendWorkflowError(workflow: string, error: string) {
         if (!this._view) return;
         this._view.webview.postMessage({
-            type: "workflowError",
+            type: 'workflowError',
             workflow: workflow,
             error: error
         });
@@ -547,9 +554,9 @@ Generate a review document following the opusflow review workflow format.
         });
 
         if (files && this._view) {
-            const paths = files.map(f => vscode.workspace.asRelativePath(f));
+            const paths = files.map((f) => vscode.workspace.asRelativePath(f));
             this._view.webview.postMessage({
-                type: "appendContext",
+                type: 'appendContext',
                 files: paths
             });
         }

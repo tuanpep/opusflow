@@ -2,15 +2,15 @@ import * as vscode from 'vscode';
 import { OpusFlowWrapper } from '../cli/opusflowWrapper';
 
 export class SpecCommands {
-    constructor(private cli: OpusFlowWrapper) { }
+    constructor(private cli: OpusFlowWrapper) {}
 
     /**
      * Create a new specification from user input
      */
-    async createSpec(context: vscode.ExtensionContext): Promise<void> {
+    async createSpec(_context: vscode.ExtensionContext): Promise<void> {
         const description = await vscode.window.showInputBox({
             prompt: 'Enter feature description (what do you want to build?)',
-            placeHolder: 'Add OAuth2 authentication with JWT tokens',
+            placeHolder: 'e.g., Add user authentication with OAuth2 and JWT token management',
             ignoreFocusOut: true
         });
 
@@ -20,7 +20,7 @@ export class SpecCommands {
 
         const title = await vscode.window.showInputBox({
             prompt: 'Enter a short title (optional)',
-            placeHolder: 'OAuth2 Auth',
+            placeHolder: 'e.g., User Authentication',
             ignoreFocusOut: true
         });
 

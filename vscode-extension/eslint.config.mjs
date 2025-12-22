@@ -31,12 +31,35 @@ export default [
             '@typescript-eslint': tseslint
         },
         rules: {
+            // TypeScript specific rules
             '@typescript-eslint/naming-convention': 'off',
-            '@typescript-eslint/no-unused-vars': ['warn', { argsIgnorePattern: '^_' }],
-            '@typescript-eslint/no-explicit-any': 'off',
+            '@typescript-eslint/no-unused-vars': ['warn', { 
+                argsIgnorePattern: '^_',
+                varsIgnorePattern: '^_',
+                caughtErrorsIgnorePattern: '^_'
+            }],
+            '@typescript-eslint/no-explicit-any': 'warn',
+            '@typescript-eslint/explicit-function-return-type': 'off',
+            '@typescript-eslint/no-non-null-assertion': 'warn',
+            '@typescript-eslint/no-unused-expressions': 'error',
+            
+            // General JavaScript/TypeScript rules
             'semi': ['error', 'always'],
-            'no-unused-vars': 'off',
-            'no-undef': 'off'
+            'no-unused-vars': 'off', // Use TypeScript version instead
+            'no-undef': 'off', // TypeScript handles this
+            'no-console': 'warn', // Allow console but warn
+            'no-debugger': 'error',
+            'no-duplicate-imports': 'error',
+            'no-unused-expressions': 'off', // Use TypeScript version
+            'prefer-const': 'error',
+            'no-var': 'error',
+            'eqeqeq': ['error', 'always'],
+            'curly': ['error', 'all'],
+            'brace-style': ['error', '1tbs'],
+            'comma-dangle': ['error', 'never'],
+            'quotes': ['error', 'single', { avoidEscape: true }],
+            'indent': ['error', 4, { SwitchCase: 1 }],
+            'max-len': ['warn', { code: 120, ignoreUrls: true, ignoreStrings: true }]
         }
     },
     {

@@ -3,7 +3,6 @@ package cmd
 import (
 	"fmt"
 	"os"
-	"strings"
 
 	"github.com/spf13/cobra"
 	"github.com/tuanpep/oplusflow/internal/ops"
@@ -107,14 +106,4 @@ func init() {
 	// Add subcommand for generating prompts from existing specs
 	specCmd.AddCommand(specPromptCmd)
 	specPromptCmd.Flags().StringP("output", "o", "", "Output file for the prompt")
-}
-
-// Helper to check if a string starts with common prefixes
-func hasPrefix(s string, prefixes ...string) bool {
-	for _, p := range prefixes {
-		if strings.HasPrefix(s, p) {
-			return true
-		}
-	}
-	return false
 }

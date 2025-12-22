@@ -11,7 +11,7 @@ export class ChatSidebarProvider implements vscode.WebviewViewProvider {
         private readonly _extensionUri: vscode.Uri,
         private readonly _authManager: AuthManager,
         private readonly _cli: OpusFlowWrapper
-    ) { }
+    ) {}
 
     public resolveWebviewView(
         webviewView: vscode.WebviewView,
@@ -83,7 +83,12 @@ export class ChatSidebarProvider implements vscode.WebviewViewProvider {
             });
 
             // Extract a title (first 5 words)
-            const title = text.split(' ').slice(0, 5).join('-').toLowerCase().replace(/[^a-z0-9-]/g, '');
+            const title = text
+                .split(' ')
+                .slice(0, 5)
+                .join('-')
+                .toLowerCase()
+                .replace(/[^a-z0-9-]/g, '');
 
             // Call CLI to create plan
             const planResult = await this._cli.plan(title);
@@ -101,7 +106,6 @@ export class ChatSidebarProvider implements vscode.WebviewViewProvider {
 
             // Refresh the tree view
             vscode.commands.executeCommand('opusflow.refreshExplorer');
-
         } catch (error: any) {
             this._view?.webview.postMessage({
                 command: 'addMessage',
@@ -121,7 +125,7 @@ export class ChatSidebarProvider implements vscode.WebviewViewProvider {
         });
 
         if (files) {
-            const paths = files.map(f => vscode.workspace.asRelativePath(f));
+            const paths = files.map((f) => vscode.workspace.asRelativePath(f));
             this._view?.webview.postMessage({
                 command: 'appendContext',
                 files: paths
@@ -458,7 +462,7 @@ export class ChatSidebarProvider implements vscode.WebviewViewProvider {
         <div class="message agent">
             <div class="message-content">
                 👋 <strong>Hi! I'm OpusFlow.</strong><br>
-                Describe a task to create a new plan, or use <code>@</code> to add context files.
+                Describe your feature or task to create a new plan. Use <code>@</code> to add context files.
             </div>
         </div>
     </div>
@@ -467,7 +471,7 @@ export class ChatSidebarProvider implements vscode.WebviewViewProvider {
         <div class="context-preview" id="context-preview"></div>
         <div class="input-box">
             <button class="btn-icon" onclick="addContext()" title="Add Context (@)" style="padding: 4px;">📎</button>
-            <textarea id="msg-input" placeholder="What are we building today? (Enter to submit)" rows="1"></textarea>
+            <textarea id="msg-input" placeholder="Describe your feature or task... (Press Enter to submit, Shift+Enter for new line)" rows="1"></textarea>
             <button class="send-btn" onclick="sendMessage()">➤</button>
         </div>
     </div>

@@ -12,7 +12,6 @@ export class AuthManager {
     constructor(context: vscode.ExtensionContext) {
         this.secretManager = new SecretManager(context.secrets);
 
-
         this.providers.set(AuthProviderType.Gemini, new GeminiAuth(this.secretManager));
         this.providers.set(AuthProviderType.Cursor, new CursorAuth(this.secretManager));
     }

@@ -4,7 +4,7 @@ import { AuthProviderType } from '../auth/types';
 
 /**
  * AuthSidebarProvider - Provides a webview-based sidebar for easy authentication
- * 
+ *
  * Features:
  * - One-click browser login for Cursor Agent
  * - Visual status for all AI agents
@@ -17,7 +17,7 @@ export class AuthSidebarProvider implements vscode.WebviewViewProvider {
     constructor(
         private readonly _extensionUri: vscode.Uri,
         private readonly _authManager: AuthManager
-    ) { }
+    ) {}
 
     private _currentAgent: string = 'prompt';
 
@@ -106,20 +106,24 @@ export class AuthSidebarProvider implements vscode.WebviewViewProvider {
         // Map provider type to agent string ID expected by extension
         let agentId = 'prompt';
         switch (provider) {
-            case AuthProviderType.Cursor: agentId = 'cursor'; break; // Note: extension uses 'cursor' or 'aider'? Package.json says 'aider', 'claude-code', 'prompt'. But CursorAuth is 'cursor'. 
-            // Wait, package.json says keys are 'aider', 'claude-code', 'prompt'. 
+            case AuthProviderType.Cursor:
+                agentId = 'cursor';
+                break; // Note: extension uses 'cursor' or 'aider'? Package.json says 'aider', 'claude-code', 'prompt'. But CursorAuth is 'cursor'.
+            // Wait, package.json says keys are 'aider', 'claude-code', 'prompt'.
             // CursorAuth type is 'cursor-agent'.
             // Let's assume 'cursor' for now, or check what Select Agent uses.
             // Select Agent uses 'aider', 'claude-code', 'prompt'.
             // Does it support 'cursor'? The selectAgent command in extension.ts only lists those 3.
             // I should probably add 'cursor' to selectAgent list in extension.ts too if it's supported.
-            // For now, let's map: 
+            // For now, let's map:
             // Gemini -> 'gemini' (not in list?)
             // Claude -> 'claude-code'
 
             // Actually, I should trigger the command execution so extension.ts handles the state update
 
-            case AuthProviderType.Gemini: agentId = 'gemini'; break;
+            case AuthProviderType.Gemini:
+                agentId = 'gemini';
+                break;
         }
 
         // Execute the selectAgent command but we need to pass the agent.
@@ -131,9 +135,12 @@ export class AuthSidebarProvider implements vscode.WebviewViewProvider {
 
     private _getAgentName(provider: AuthProviderType): string {
         switch (provider) {
-            case AuthProviderType.Cursor: return 'Cursor';
-            case AuthProviderType.Gemini: return 'Gemini';
-            default: return provider;
+            case AuthProviderType.Cursor:
+                return 'Cursor';
+            case AuthProviderType.Gemini:
+                return 'Gemini';
+            default:
+                return provider;
         }
     }
 
@@ -141,20 +148,14 @@ export class AuthSidebarProvider implements vscode.WebviewViewProvider {
         if (!this._view) return;
 
         const statuses = await this._authManager.checkSessions();
-        this._view.webview.html = this._getHtmlForWebview(
-            this._view.webview,
-            statuses
-        );
+        this._view.webview.html = this._getHtmlForWebview(this._view.webview, statuses);
     }
 
     public refresh(): void {
         this._updateWebview();
     }
 
-    private _getHtmlForWebview(
-        webview: vscode.Webview,
-        authStatuses: Map<AuthProviderType, boolean>
-    ): string {
+    private _getHtmlForWebview(webview: vscode.Webview, authStatuses: Map<AuthProviderType, boolean>): string {
         const cursorAuth = authStatuses.get(AuthProviderType.Cursor);
         const geminiAuth = authStatuses.get(AuthProviderType.Gemini);
 
@@ -425,13 +426,14 @@ export class AuthSidebarProvider implements vscode.WebviewViewProvider {
     
     <div class="agent-list">
         <!-- Cursor Agent - Primary/Easy -->
-        <div class="agent-card ${cursorAuth ? 'connected' : ''}" id="cursor-card">
+        <div class="agent-card ${cursorAuth ? 'connected' : ''} ${this._currentAgent === 'cursor' ? 'selected' : ''}" id="cursor-card">
             <div class="agent-header">
                 <div class="agent-icon cursor">C</div>
                 <div class="agent-info">
                     <div class="agent-name">
                         Cursor
                         <span class="easy-badge">Easy</span>
+                        ${this._currentAgent === 'cursor' ? '<span class="selected-badge">Active</span>' : ''}
                     </div>
                     <div class="agent-desc">Browser login • No key needed</div>
                 </div>
@@ -440,16 +442,20 @@ export class AuthSidebarProvider implements vscode.WebviewViewProvider {
                 <span class="status-dot"></span>
                 ${cursorAuth ? 'Connected' : 'Not connected'}
             </div>
-            ${cursorAuth ? `
+            ${
+                cursorAuth
+                    ? `
                 <div class="btn-group">
-                    <button class="btn btn-secondary" onclick="refresh()">Refresh</button>
+                    ${this._currentAgent !== 'cursor' ? `<button class="btn btn-primary" onclick="select('cursor-agent')">Use</button>` : ''}
                     <button class="btn btn-secondary" onclick="logout('cursor-agent')">Logout</button>
                 </div>
-            ` : `
+            `
+                    : `
                 <button class="btn btn-primary" onclick="login('cursor-agent')">
                     🔓 Login with Browser
                 </button>
-            `}
+            `
+            }
         </div>
         <div class="agent-card ${geminiAuth ? 'connected' : ''} ${this._currentAgent === 'gemini' ? 'selected' : ''}" id="gemini-card">
             <div class="agent-header">
@@ -466,14 +472,18 @@ export class AuthSidebarProvider implements vscode.WebviewViewProvider {
                 <span class="status-dot"></span>
                 ${geminiAuth ? 'Connected' : 'Not connected'}
             </div>
-            ${geminiAuth ? `
+            ${
+                geminiAuth
+                    ? `
                 <div class="btn-group">
                     ${this._currentAgent !== 'gemini' ? `<button class="btn btn-primary" onclick="select('gemini-cli')">Use</button>` : ''}
                     <button class="btn btn-secondary" onclick="logout('gemini-cli')">Logout</button>
                 </div>
-            ` : `
+            `
+                    : `
                 <button class="btn btn-primary" onclick="login('gemini-cli')">Connect</button>
-            `}
+            `
+            }
         </div>
     </div>
     

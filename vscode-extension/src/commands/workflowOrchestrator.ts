@@ -14,7 +14,7 @@ export class WorkflowOrchestrator {
         private cli: OpusFlowWrapper,
         private authManager: AuthManager,
         private webview?: WorkflowWebview
-    ) { }
+    ) {}
 
     public setWebview(webview: WorkflowWebview) {
         this.webview = webview;
@@ -23,10 +23,7 @@ export class WorkflowOrchestrator {
     /**
      * Execute a complete workflow from plan to verification
      */
-    public async executeWorkflow(
-        planFile: string,
-        agent: AuthProviderType
-    ): Promise<void> {
+    public async executeWorkflow(planFile: string, agent: AuthProviderType): Promise<void> {
         // Validate authentication
         const isAuthenticated = await this.authManager.isAuthenticated(agent);
         if (!isAuthenticated) {
@@ -64,14 +61,10 @@ export class WorkflowOrchestrator {
             this.currentWorkflow.status = 'completed';
             this.currentWorkflow.endTime = new Date();
 
-            const duration = this.calculateDuration(
-                this.currentWorkflow.startTime!,
-                this.currentWorkflow.endTime
-            );
+            const duration = this.calculateDuration(this.currentWorkflow.startTime!, this.currentWorkflow.endTime);
 
             this.webview?.log(`✅ Workflow completed successfully in ${duration}`, 'success');
             vscode.window.showInformationMessage(`Workflow completed successfully!`);
-
         } catch (error: any) {
             this.currentWorkflow.status = 'failed';
             this.currentWorkflow.endTime = new Date();
@@ -124,7 +117,6 @@ export class WorkflowOrchestrator {
             const duration = this.calculateDuration(phase.startTime, phase.endTime);
             this.webview?.log(`✓ ${phase.title} completed in ${duration}`, 'success');
             this.webview?.updatePhases(this.currentWorkflow!.phases);
-
         } catch (error: any) {
             phase.status = 'failed';
             phase.error = error.message;
@@ -182,7 +174,10 @@ export class WorkflowOrchestrator {
 
     private async executeResearchPhase(): Promise<void> {
         this.webview?.log('Executing research phase...', 'info');
-        this.webview?.log('This is a simulated phase - in production, this would trigger the actual AI agent', 'warning');
+        this.webview?.log(
+            'This is a simulated phase - in production, this would trigger the actual AI agent',
+            'warning'
+        );
 
         // Simulate research work
         const steps = ['Analyzing requirements', 'Researching solutions', 'Planning implementation'];
@@ -199,12 +194,7 @@ export class WorkflowOrchestrator {
         this.webview?.log('This is a simulated phase - in production, this would monitor the AI agent', 'warning');
 
         // Simulate implementation work
-        const steps = [
-            'Creating files',
-            'Writing code',
-            'Running tests',
-            'Fixing issues'
-        ];
+        const steps = ['Creating files', 'Writing code', 'Running tests', 'Fixing issues'];
 
         for (const step of steps) {
             this.webview?.log(`  • ${step}...`, 'info');
@@ -225,13 +215,9 @@ export class WorkflowOrchestrator {
         this.webview?.log('Executing opusflow verify command...', 'info');
 
         // Execute verification
-        const result = await this.cli.verify(
-            planFile,
-            workspaceRoot,
-            (output) => {
-                this.webview?.log(output.trim(), 'info');
-            }
-        );
+        const result = await this.cli.verify(planFile, workspaceRoot, (output) => {
+            this.webview?.log(output.trim(), 'info');
+        });
 
         // Load and display verification report
         if (fs.existsSync(result.fullPath)) {
@@ -294,7 +280,7 @@ export class WorkflowOrchestrator {
     }
 
     private delay(ms: number): Promise<void> {
-        return new Promise(resolve => setTimeout(resolve, ms));
+        return new Promise((resolve) => setTimeout(resolve, ms));
     }
 
     public getCurrentWorkflow(): WorkflowState | null {

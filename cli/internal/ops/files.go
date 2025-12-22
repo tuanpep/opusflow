@@ -8,43 +8,17 @@ import (
 	"sort"
 	"strings"
 
-	ignore "github.com/sabhiram/go-gitignore"
 	"github.com/tuanpep/oplusflow/internal/manager"
 )
 
-// Directories to always skip - these are typically huge and not useful for code search
-var alwaysSkipDirs = map[string]bool{
-	"node_modules": true,
-	"vendor":       true,
-	".git":         true,
-	"dist":         true,
-	"build":        true,
-	".next":        true,
-	"__pycache__":  true,
-	".venv":        true,
-	"venv":         true,
-	".tox":         true,
-	".cache":       true,
-	".idea":        true,
-	".vscode":      true,
-	"coverage":     true,
-	".nyc_output":  true,
-	"target":       true, // Rust/Java
-	"bin":          true,
-	"obj":          true, // C#
-}
-
+// ListFiles uses IgnoreHandler to list files respecting .gitignore
 func ListFiles(dir string) ([]string, error) {
 	root, err := manager.FindProjectRoot()
 	if err != nil {
 		return nil, fmt.Errorf("failed to find project root: %w", err)
 	}
 
-	// Load root .gitignore if exists
-	rootIgnorer, _ := ignore.CompileIgnoreFile(filepath.Join(root, ".gitignore"))
-
-	// Cache for subproject .gitignore files
-	subIgnorers := make(map[string]*ignore.GitIgnore)
+	ignoreHandler := NewIgnoreHandler(root)
 
 	targetDir := root
 	if dir != "" {
@@ -57,48 +31,20 @@ func ListFiles(dir string) ([]string, error) {
 			return nil
 		}
 
-		relPath, _ := filepath.Rel(root, path)
-
-		// Always skip certain directories
+		// Track directory for nested .gitignore files
 		if d.IsDir() {
-			if alwaysSkipDirs[d.Name()] {
-				return filepath.SkipDir
-			}
-			// Skip hidden directories (except .agent, .github, etc.)
-			if strings.HasPrefix(d.Name(), ".") && d.Name() != "." && d.Name() != ".agent" && d.Name() != ".github" {
-				return filepath.SkipDir
-			}
-			// Check if this directory has its own .gitignore and cache it
-			gitignorePath := filepath.Join(path, ".gitignore")
-			if _, statErr := os.Stat(gitignorePath); statErr == nil {
-				if ignorer, compileErr := ignore.CompileIgnoreFile(gitignorePath); compileErr == nil {
-					subIgnorers[path] = ignorer
-				}
-			}
+			ignoreHandler.TrackDirectory(path)
 		}
 
-		// Check root .gitignore
-		if rootIgnorer != nil && rootIgnorer.MatchesPath(relPath) {
+		if ignoreHandler.ShouldIgnore(path, d.IsDir()) {
 			if d.IsDir() {
 				return filepath.SkipDir
 			}
 			return nil
 		}
 
-		// Check subproject .gitignore files
-		for subRoot, ignorer := range subIgnorers {
-			if strings.HasPrefix(path, subRoot) {
-				subRelPath, _ := filepath.Rel(subRoot, path)
-				if ignorer.MatchesPath(subRelPath) {
-					if d.IsDir() {
-						return filepath.SkipDir
-					}
-					return nil
-				}
-			}
-		}
-
 		if !d.IsDir() {
+			relPath, _ := filepath.Rel(root, path)
 			files = append(files, relPath)
 		}
 		return nil

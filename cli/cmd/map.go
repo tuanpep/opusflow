@@ -35,8 +35,9 @@ Examples:
 		output, _ := cmd.Flags().GetString("output")
 		include, _ := cmd.Flags().GetStringSlice("include")
 		exclude, _ := cmd.Flags().GetStringSlice("exclude")
+		maxFiles, _ := cmd.Flags().GetInt("max-files")
 
-		pm, err := ops.GenerateCodebaseMap(dir, include, exclude)
+		pm, err := ops.GenerateCodebaseMap(dir, include, exclude, maxFiles)
 		if err != nil {
 			return fmt.Errorf("failed to generate map: %w", err)
 		}
@@ -51,7 +52,12 @@ Examples:
 		case "summary":
 			result = pm.FormatSummary()
 		case "markdown", "md":
-			fallthrough
+			compact, _ := cmd.Flags().GetBool("compact")
+			if compact {
+				result = pm.FormatCompactMarkdown()
+			} else {
+				result = pm.FormatMarkdown()
+			}
 		default:
 			result = pm.FormatMarkdown()
 		}
@@ -80,4 +86,6 @@ func init() {
 	mapCmd.Flags().StringP("output", "o", "", "Output file (default: stdout)")
 	mapCmd.Flags().StringSlice("include", nil, "Include patterns (glob)")
 	mapCmd.Flags().StringSlice("exclude", nil, "Exclude patterns (glob)")
+	mapCmd.Flags().Int("max-files", 2000, "Maximum number of files to process")
+	mapCmd.Flags().BoolP("compact", "c", false, "Compact output (hide child symbols)")
 }

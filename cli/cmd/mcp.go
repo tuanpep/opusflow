@@ -253,7 +253,7 @@ var mcpCmd = &cobra.Command{
 				}
 			}
 
-			pm, err := ops.GenerateCodebaseMap(dir, nil, nil)
+			pm, err := ops.GenerateCodebaseMap(dir, nil, nil, 2000)
 			if err != nil {
 				return mcp.NewToolResultError(fmt.Sprintf("failed to generate map: %v", err)), nil
 			}

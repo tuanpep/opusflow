@@ -1,9 +1,8 @@
 import * as vscode from 'vscode';
 import { OpusFlowWrapper } from '../cli/opusflowWrapper';
-import * as path from 'path';
 
 export class TaskCommands {
-    constructor(private cli: OpusFlowWrapper) { }
+    constructor(private cli: OpusFlowWrapper) {}
 
     /**
      * Decompose a plan into atomic tasks
@@ -28,9 +27,7 @@ export class TaskCommands {
             const cwd = this.getWorkspaceFolder();
             const result = await this.cli.decompose(planFile, cwd);
 
-            vscode.window.showInformationMessage(
-                `✅ Decomposed into ${result.tasksCount} tasks`
-            );
+            vscode.window.showInformationMessage(`✅ Decomposed into ${result.tasksCount} tasks`);
 
             // Show task list in output channel
             const channel = vscode.window.createOutputChannel('OpusFlow Tasks');
@@ -51,7 +48,7 @@ export class TaskCommands {
      * Get and display the next pending task
      */
     async nextTask(item?: any): Promise<void> {
-        let planRef = item?.planRef || await this.promptForPlanRef();
+        let planRef = item?.planRef || (await this.promptForPlanRef());
 
         if (!planRef) {
             return;
@@ -74,9 +71,7 @@ export class TaskCommands {
                 });
                 await vscode.window.showTextDocument(doc);
 
-                vscode.window.showInformationMessage(
-                    `Next task: ${result.task.id} - ${result.task.title}`
-                );
+                vscode.window.showInformationMessage(`Next task: ${result.task.id} - ${result.task.title}`);
             }
         } catch (error: any) {
             vscode.window.showErrorMessage(`Failed to get next task: ${error.message}`);
@@ -115,17 +110,16 @@ export class TaskCommands {
      * Execute a task with an external agent
      */
     async execTask(item?: any): Promise<void> {
-        let planRef = item?.planRef || await this.promptForPlanRef();
+        let planRef = item?.planRef || (await this.promptForPlanRef());
         if (!planRef) return;
 
-        const taskSpec = await vscode.window.showQuickPick(
-            ['next', 'task-1', 'task-2', 'task-3'],
-            { placeHolder: 'Select task to execute' }
-        );
+        const taskSpec = await vscode.window.showQuickPick(['next', 'task-1', 'task-2', 'task-3'], {
+            placeHolder: 'Select task to execute'
+        });
         if (!taskSpec) return;
 
         const agents = await this.cli.agents();
-        const agentItems = agents.agents.map(a => ({
+        const agentItems = agents.agents.map((a) => ({
             label: a.name,
             description: a.available ? '✅ Available' : '❌ Not installed'
         }));
@@ -144,7 +138,7 @@ export class TaskCommands {
             channel.show();
             channel.appendLine(`Executing ${taskSpec} with ${selectedAgent.label}...`);
 
-            const output = await this.cli.exec(taskSpec, planRef, selectedAgent.label, cwd, (data) => {
+            await this.cli.exec(taskSpec, planRef, selectedAgent.label, cwd, (data) => {
                 channel.append(data);
             });
 
@@ -171,11 +165,16 @@ export class TaskCommands {
 
     private getStatusEmoji(status: string): string {
         switch (status) {
-            case 'pending': return '⬜';
-            case 'in_progress': return '🔄';
-            case 'done': return '✅';
-            case 'failed': return '❌';
-            default: return '❓';
+            case 'pending':
+                return '⬜';
+            case 'in_progress':
+                return '🔄';
+            case 'done':
+                return '✅';
+            case 'failed':
+                return '❌';
+            default:
+                return '❓';
         }
     }
 

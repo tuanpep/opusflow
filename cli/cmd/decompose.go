@@ -96,7 +96,9 @@ var tasksNextCmd = &cobra.Command{
 
 		generatePrompt, _ := cmd.Flags().GetBool("prompt")
 		if generatePrompt {
-			fmt.Println("\n--- AI Prompt ---\n")
+			fmt.Println()
+			fmt.Println("--- AI Prompt ---")
+			fmt.Println()
 			fmt.Println(prompt)
 		}
 

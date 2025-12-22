@@ -2,7 +2,7 @@ import * as vscode from 'vscode';
 import { OpusFlowWrapper } from '../cli/opusflowWrapper';
 
 export class WorkflowCommands {
-    constructor(private cli: OpusFlowWrapper) { }
+    constructor(private cli: OpusFlowWrapper) {}
 
     /**
      * Show current workflow status
@@ -30,7 +30,7 @@ export class WorkflowCommands {
     async startWorkflow(): Promise<void> {
         const name = await vscode.window.showInputBox({
             prompt: 'Enter workflow name',
-            placeHolder: 'My Feature'
+            placeHolder: 'e.g., User Authentication Feature'
         });
 
         if (!name) {
@@ -59,15 +59,18 @@ export class WorkflowCommands {
             const guidance = await this.cli.workflowNext(cwd);
 
             const phaseActions: Record<string, { action: string; command: string }> = {
-                'specification': { action: 'Create a Specification', command: 'opusflow.createSpec' },
-                'planning': { action: 'Create a Plan', command: 'opusflow.createPlan' },
-                'decomposition': { action: 'Decompose the Plan', command: 'opusflow.decomposePlan' },
-                'execution': { action: 'Execute Next Task', command: 'opusflow.execTask' },
-                'verification': { action: 'Verify Implementation', command: 'opusflow.verifyPlan' },
-                'complete': { action: 'Workflow Complete!', command: '' }
+                specification: { action: 'Create a Specification', command: 'opusflow.createSpec' },
+                planning: { action: 'Create a Plan', command: 'opusflow.createPlan' },
+                decomposition: { action: 'Decompose the Plan', command: 'opusflow.decomposePlan' },
+                execution: { action: 'Execute Next Task', command: 'opusflow.execTask' },
+                verification: { action: 'Verify Implementation', command: 'opusflow.verifyPlan' },
+                complete: { action: 'Workflow Complete!', command: '' }
             };
 
-            const nextAction = phaseActions[guidance.nextPhase] || { action: 'Start New Workflow', command: 'opusflow.workflowStart' };
+            const nextAction = phaseActions[guidance.nextPhase] || {
+                action: 'Start New Workflow',
+                command: 'opusflow.workflowStart'
+            };
 
             const selected = await vscode.window.showInformationMessage(
                 `Phase: ${guidance.currentPhase} → Next: ${guidance.nextPhase}`,
@@ -122,14 +125,14 @@ export class WorkflowCommands {
 
     private formatStatusMarkdown(status: any): string {
         const phaseEmoji: Record<string, string> = {
-            'idle': '⏸️',
-            'specification': '📝',
-            'planning': '📋',
-            'decomposition': '🔨',
-            'execution': '⚡',
-            'verification': '🔍',
-            'complete': '✅',
-            'failed': '❌'
+            idle: '⏸️',
+            specification: '📝',
+            planning: '📋',
+            decomposition: '🔨',
+            execution: '⚡',
+            verification: '🔍',
+            complete: '✅',
+            failed: '❌'
         };
 
         const emoji = phaseEmoji[status.currentPhase] || '❓';

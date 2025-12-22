@@ -4,7 +4,9 @@ import * as fs from 'fs';
 import { FileWatcher } from '../utils/fileWatcher';
 
 export class OpusFlowExplorerProvider implements vscode.TreeDataProvider<PlanningItem> {
-    private _onDidChangeTreeData: vscode.EventEmitter<PlanningItem | undefined | void> = new vscode.EventEmitter<PlanningItem | undefined | void>();
+    private _onDidChangeTreeData: vscode.EventEmitter<PlanningItem | undefined | void> = new vscode.EventEmitter<
+        PlanningItem | undefined | void
+    >();
     readonly onDidChangeTreeData: vscode.Event<PlanningItem | undefined | void> = this._onDidChangeTreeData.event;
 
     constructor(private watcher: FileWatcher) {
@@ -42,46 +44,32 @@ export class OpusFlowExplorerProvider implements vscode.TreeDataProvider<Plannin
 
     private getRootCategories(planningDir: string, opusflowDir: string): PlanningItem[] {
         // Ensure dirs exist
-        ['specs', 'phases', 'plans', 'verifications'].forEach(d => {
+        ['specs', 'phases', 'plans', 'verifications'].forEach((d) => {
             const p = path.join(planningDir, d);
             if (!fs.existsSync(p)) fs.mkdirSync(p, { recursive: true });
         });
 
         const categories: PlanningItem[] = [
-            new PlanningItem(
-                'Specifications',
-                vscode.TreeItemCollapsibleState.Expanded,
-                undefined,
-                'category',
-                { categoryType: 'specs' }
-            ),
-            new PlanningItem(
-                'Plans',
-                vscode.TreeItemCollapsibleState.Expanded,
-                undefined,
-                'category',
-                { categoryType: 'plans' }
-            ),
-            new PlanningItem(
-                'Phases',
-                vscode.TreeItemCollapsibleState.Collapsed,
-                undefined,
-                'category',
-                { categoryType: 'phases' }
-            )
+            new PlanningItem('Specifications', vscode.TreeItemCollapsibleState.Expanded, undefined, 'category', {
+                categoryType: 'specs'
+            }),
+            new PlanningItem('Plans', vscode.TreeItemCollapsibleState.Expanded, undefined, 'category', {
+                categoryType: 'plans'
+            }),
+            new PlanningItem('Phases', vscode.TreeItemCollapsibleState.Collapsed, undefined, 'category', {
+                categoryType: 'phases'
+            })
         ];
 
         // Add Tasks category if any task queues exist
         if (fs.existsSync(opusflowDir)) {
-            const taskFiles = fs.readdirSync(opusflowDir).filter(f => f.startsWith('tasks-'));
+            const taskFiles = fs.readdirSync(opusflowDir).filter((f) => f.startsWith('tasks-'));
             if (taskFiles.length > 0) {
-                categories.push(new PlanningItem(
-                    'Task Queues',
-                    vscode.TreeItemCollapsibleState.Expanded,
-                    undefined,
-                    'category',
-                    { categoryType: 'tasks' }
-                ));
+                categories.push(
+                    new PlanningItem('Task Queues', vscode.TreeItemCollapsibleState.Expanded, undefined, 'category', {
+                        categoryType: 'tasks'
+                    })
+                );
             }
         }
 
@@ -106,32 +94,29 @@ export class OpusFlowExplorerProvider implements vscode.TreeDataProvider<Plannin
             // List task queue files
             if (!fs.existsSync(opusflowDir)) return [];
 
-            const taskFiles = fs.readdirSync(opusflowDir).filter(f => f.startsWith('tasks-'));
-            return taskFiles.map(file => {
+            const taskFiles = fs.readdirSync(opusflowDir).filter((f) => f.startsWith('tasks-'));
+            return taskFiles.map((file) => {
                 const planRef = file.replace('tasks-', '').replace('.json', '');
-                return new PlanningItem(
-                    planRef,
-                    vscode.TreeItemCollapsibleState.Collapsed,
-                    undefined,
-                    'taskQueue',
-                    { filePath: path.join(opusflowDir, file), planRef }
-                );
+                return new PlanningItem(planRef, vscode.TreeItemCollapsibleState.Collapsed, undefined, 'taskQueue', {
+                    filePath: path.join(opusflowDir, file),
+                    planRef
+                });
             });
         }
 
         // Handle specs, plans, phases
         const dirMap: Record<string, string> = {
-            'specs': 'specs',
-            'plans': 'plans',
-            'phases': 'phases'
+            specs: 'specs',
+            plans: 'plans',
+            phases: 'phases'
         };
 
         const subDir = path.join(planningDir, dirMap[categoryType] || categoryType);
         if (!fs.existsSync(subDir)) return [];
 
-        const files = fs.readdirSync(subDir).filter(f => !f.startsWith('.') && f.endsWith('.md'));
+        const files = fs.readdirSync(subDir).filter((f) => !f.startsWith('.') && f.endsWith('.md'));
 
-        return files.map(file => {
+        return files.map((file) => {
             const filePath = path.join(subDir, file);
             const isPlan = categoryType === 'plans';
             const isSpec = categoryType === 'specs';
@@ -143,7 +128,7 @@ export class OpusFlowExplorerProvider implements vscode.TreeDataProvider<Plannin
                 if (fs.existsSync(verificationsDir)) {
                     const planName = path.parse(file).name;
                     const verifyFiles = fs.readdirSync(verificationsDir);
-                    hasVerification = verifyFiles.some(f => f.includes(planName));
+                    hasVerification = verifyFiles.some((f) => f.includes(planName));
                 }
             }
 
@@ -168,19 +153,22 @@ export class OpusFlowExplorerProvider implements vscode.TreeDataProvider<Plannin
         if (!fs.existsSync(verificationsDir)) return [];
 
         const planName = path.parse(element.label).name;
-        const verifyFiles = fs.readdirSync(verificationsDir).filter(f => f.includes(planName));
+        const verifyFiles = fs.readdirSync(verificationsDir).filter((f) => f.includes(planName));
 
-        return verifyFiles.map(f => new PlanningItem(
-            f,
-            vscode.TreeItemCollapsibleState.None,
-            {
-                command: 'vscode.open',
-                title: 'Open Verification',
-                arguments: [vscode.Uri.file(path.join(verificationsDir, f))]
-            },
-            'verification',
-            { filePath: path.join(verificationsDir, f) }
-        ));
+        return verifyFiles.map(
+            (f) =>
+                new PlanningItem(
+                    f,
+                    vscode.TreeItemCollapsibleState.None,
+                    {
+                        command: 'vscode.open',
+                        title: 'Open Verification',
+                        arguments: [vscode.Uri.file(path.join(verificationsDir, f))]
+                    },
+                    'verification',
+                    { filePath: path.join(verificationsDir, f) }
+                )
+        );
     }
 
     private getTaskQueueChildren(element: PlanningItem, opusflowDir: string): PlanningItem[] {
@@ -209,12 +197,18 @@ export class OpusFlowExplorerProvider implements vscode.TreeDataProvider<Plannin
 
     private getTaskStatusIcon(status: string): vscode.ThemeIcon {
         switch (status) {
-            case 'pending': return new vscode.ThemeIcon('circle-outline');
-            case 'in_progress': return new vscode.ThemeIcon('sync~spin');
-            case 'done': return new vscode.ThemeIcon('check');
-            case 'failed': return new vscode.ThemeIcon('error');
-            case 'skipped': return new vscode.ThemeIcon('debug-step-over');
-            default: return new vscode.ThemeIcon('question');
+            case 'pending':
+                return new vscode.ThemeIcon('circle-outline');
+            case 'in_progress':
+                return new vscode.ThemeIcon('sync~spin');
+            case 'done':
+                return new vscode.ThemeIcon('check');
+            case 'failed':
+                return new vscode.ThemeIcon('error');
+            case 'skipped':
+                return new vscode.ThemeIcon('debug-step-over');
+            default:
+                return new vscode.ThemeIcon('question');
         }
     }
 }
