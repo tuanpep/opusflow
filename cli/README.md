@@ -65,4 +65,16 @@ Add the following to your MCP configuration (e.g., `claude_desktop_config.json`)
 
 This exposes the following tools to the agent:
 - `create_plan`: Create a new implementation plan.
-- `generate_prompt`: Generate a prompt (plan, execute, verify).
+- `generate_prompt`: Generate a prompt (plan, research, execute, verify).
+- `list_files`: List files in the project to understand structure.
+- `search_codebase`: Search for a string query across the entire codebase.
+
+### Parallel Research Pattern
+
+OpusFlow supports a "Deep Dive Research" pattern. When you generate a prompt for research:
+
+```bash
+opusflow prompt research plan-01-feature.md
+```
+
+It instructs the agent to use `list_files` and `search_codebase` in parallel to gather context before implementation.

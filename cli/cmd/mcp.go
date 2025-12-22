@@ -3,6 +3,7 @@ package cmd
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	"github.com/ergonml/opusflow/internal/ops"
 	"github.com/mark3labs/mcp-go/mcp"
@@ -77,6 +78,73 @@ var mcpCmd = &cobra.Command{
 			}
 
 			return mcp.NewToolResultText(prompt), nil
+		})
+
+		// Tool: list_files
+		s.AddTool(mcp.NewTool("list_files",
+			mcp.WithDescription("List files in the project to understand structure"),
+			mcp.WithString("dir",
+				mcp.Description("Optional subdirectory to list (relative to root)"),
+			),
+		), func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+			args, ok := request.Params.Arguments.(map[string]interface{})
+			// args can be nil if no args provided
+			var dir string
+			if ok {
+				if d, ok := args["dir"].(string); ok {
+					dir = d
+				}
+			}
+
+			files, err := ops.ListFiles(dir)
+			if err != nil {
+				return mcp.NewToolResultError(fmt.Sprintf("failed to list files: %v", err)), nil
+			}
+
+			// limit output if too huge? mcp-go might handle it, but let's be safe.
+			if len(files) > 1000 {
+				files = files[:1000]
+			}
+
+			return mcp.NewToolResultText(strings.Join(files, "\n")), nil
+		})
+
+		// Tool: search_codebase
+		s.AddTool(mcp.NewTool("search_codebase",
+			mcp.WithDescription("Search for a string query across the entire codebase (case-insensitive)"),
+			mcp.WithString("query",
+				mcp.Required(),
+				mcp.Description("The string pattern to search for"),
+			),
+		), func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+			args, ok := request.Params.Arguments.(map[string]interface{})
+			if !ok {
+				return mcp.NewToolResultError("invalid arguments"), nil
+			}
+
+			query, ok := args["query"].(string)
+			if !ok {
+				return mcp.NewToolResultError("query must be a string"), nil
+			}
+
+			results, err := ops.SearchCodebase(query)
+			if err != nil {
+				return mcp.NewToolResultError(fmt.Sprintf("failed to search: %v", err)), nil
+			}
+
+			// Format results
+			var sb strings.Builder
+			for _, r := range results {
+				sb.WriteString(fmt.Sprintf("%s:%d: %s\n", r.File, r.Line, r.Content))
+			}
+
+			output := sb.String()
+			// Basic truncation
+			if len(output) > 50000 {
+				output = output[:50000] + "\n... truncated ..."
+			}
+
+			return mcp.NewToolResultText(output), nil
 		})
 
 		if err := server.ServeStdio(s); err != nil {

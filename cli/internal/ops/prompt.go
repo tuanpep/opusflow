@@ -12,6 +12,8 @@ func GeneratePrompt(action, file string) (string, error) {
 	switch action {
 	case "plan":
 		return fmt.Sprintf("Read @opusflow-planning/plans/%s and fill in the details based on the user query.\n", filepath.Base(file)), nil
+	case "research":
+		return fmt.Sprintf("Analyze the task described in @opusflow-planning/plans/%s.\nUse your search tools (search_codebase, list_files) in PARALLEL to identify relevant files, patterns, and dependencies.\nUpdate the 'Observations' section of the plan with your findings.\n", filepath.Base(file)), nil
 	case "execute":
 		return fmt.Sprintf("Follow the plan in @opusflow-planning/plans/%s verbatim.\nExecute each step in order. After completion, run the verification commands.\n", filepath.Base(file)), nil
 	case "verify":
