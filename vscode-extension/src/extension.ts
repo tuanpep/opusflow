@@ -3,6 +3,7 @@ import * as path from 'path';
 import * as fs from 'fs';
 import { AuthManager } from './auth/authManager';
 import { AuthWebview } from './ui/authWebview';
+import { AuthSidebarProvider } from './ui/authSidebar';
 import { AuthProviderType } from './auth/types';
 import { FileWatcher } from './utils/fileWatcher';
 import { OpusFlowExplorerProvider } from './ui/opusflowExplorer';
@@ -61,6 +62,12 @@ export function activate(context: vscode.ExtensionContext) {
     // Initialize Tree View
     const explorerProvider = new OpusFlowExplorerProvider(fileWatcher);
     vscode.window.registerTreeDataProvider('opusflowExplorer', explorerProvider);
+
+    // Initialize Auth Sidebar
+    const authSidebarProvider = new AuthSidebarProvider(context.extensionUri, authManager);
+    context.subscriptions.push(
+        vscode.window.registerWebviewViewProvider(AuthSidebarProvider.viewType, authSidebarProvider)
+    );
 
     // Register commands
     registerCommands(context, extensionContext);
@@ -170,6 +177,22 @@ function registerCommands(
         }
     );
 
+    // Copy Verification Prompt command
+    const copyVerificationPromptCmd = vscode.commands.registerCommand(
+        'opusflow.copyVerificationPrompt',
+        async (item: any) => {
+            if (!item || !item.label) return;
+            try {
+                // Assuming item.label is the plan filename
+                const prompt = await extensionContext.cli.prompt('verify', item.label);
+                await vscode.env.clipboard.writeText(prompt);
+                vscode.window.showInformationMessage('📋 Verification prompt copied to clipboard!');
+            } catch (error: any) {
+                vscode.window.showErrorMessage(`Failed to generate prompt: ${error.message}`);
+            }
+        }
+    );
+
     // Add all commands to subscriptions for cleanup
     context.subscriptions.push(
         createPlanCmd,
@@ -177,6 +200,7 @@ function registerCommands(
         executeWorkflowCmd,
         openWorkflowCmd,
         selectAgentCmd,
-        authenticateAgentCmd
+        authenticateAgentCmd,
+        copyVerificationPromptCmd
     );
 }
