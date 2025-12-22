@@ -51,3 +51,19 @@ jobs:
           args: release --clean
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Update major version tag
+        run: |
+          # Extract major version from tag (v1.2.3 -> v1)
+          TAG="${{ steps.tag_version.outputs.new_tag }}"
+          MAJOR=$(echo "$TAG" | sed -E 's/^(v[0-9]+).*/\1/')
+          
+          echo "Updating $MAJOR to point to $TAG"
+          
+          # Delete existing major tag if exists
+          git tag -d "$MAJOR" 2>/dev/null || true
+          git push origin ":refs/tags/$MAJOR" 2>/dev/null || true
+          
+          # Create new major tag pointing to current release
+          git tag "$MAJOR"
+          git push origin "$MAJOR"
