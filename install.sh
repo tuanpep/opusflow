@@ -45,9 +45,10 @@ fi
 echo "Latest version: $VERSION"
 
 # Construct download URL (matching GoReleaser naming convention in .goreleaser.yaml)
-# Template: {{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}
-# Example: opusflow_v0.1.0_Linux_x86_64.tar.gz
-ASSET_NAME="${BINARY}_${VERSION}_${OS_TYPE}_${ARCH_TYPE}.tar.gz"
+# GoReleaser default strips 'v' from version in filenames
+# Tag: v0.1.1 -> Version: 0.1.1
+CLEAN_VERSION="${VERSION#v}"
+ASSET_NAME="${BINARY}_${CLEAN_VERSION}_${OS_TYPE}_${ARCH_TYPE}.tar.gz"
 DOWNLOAD_URL="https://github.com/$OWNER/$REPO/releases/download/$VERSION/$ASSET_NAME"
 
 echo "Downloading $DOWNLOAD_URL..."
