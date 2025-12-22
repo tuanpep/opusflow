@@ -11,13 +11,13 @@ OS="$(uname -s)"
 ARCH="$(uname -m)"
 
 case "$OS" in
-    Linux)  OS_TYPE="Linux" ;;
-    Darwin) OS_TYPE="Darwin" ;;
+    Linux)  OS_TYPE="linux" ;;
+    Darwin) OS_TYPE="darwin" ;;
     *) echo "Unsupported OS: $OS"; exit 1 ;;
 esac
 
 case "$ARCH" in
-    x86_64) ARCH_TYPE="x86_64" ;;
+    x86_64) ARCH_TYPE="amd64" ;;
     arm64|aarch64)  ARCH_TYPE="arm64" ;;
     *) echo "Unsupported Arch: $ARCH"; exit 1 ;;
 esac
