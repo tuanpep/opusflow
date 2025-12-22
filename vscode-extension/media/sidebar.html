@@ -68,6 +68,65 @@
             color: var(--vscode-descriptionForeground);
         }
 
+        /* Agent Badge */
+        .agent-badge {
+            margin-left: auto; /* Push to right */
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 8px;
+            background: var(--vscode-editor-background);
+            border: 1px solid var(--vscode-panel-border);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .agent-badge:hover {
+            border-color: var(--vscode-focusBorder);
+            background: var(--vscode-list-hoverBackground);
+        }
+
+        .agent-icon {
+            width: 16px;
+            height: 16px;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            font-weight: bold;
+            color: white;
+        }
+
+        .agent-icon.gemini {
+            background: linear-gradient(135deg, #4285f4, #34a853);
+        }
+
+        .agent-icon.cursor {
+            background: #333;
+        }
+
+        .agent-icon.prompt {
+            background: var(--vscode-textBlockQuote-border);
+        }
+
+        .status-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background-color: var(--vscode-disabledForeground);
+        }
+
+        .status-dot.connected {
+            background-color: var(--vscode-testing-iconPassed);
+            box-shadow: 0 0 4px var(--vscode-testing-iconPassed);
+        }
+
+        .status-dot.disconnected {
+            background-color: var(--vscode-testing-iconFailed);
+        }
+
         /* Main Content */
         .main-content {
             flex: 1;
@@ -341,6 +400,11 @@
         <div>
             <h1>OpusFlow</h1>
             <div class="header-subtitle">Spec-Driven Development</div>
+        </div>
+        <!-- Agent Status Badge -->
+        <div class="agent-badge" id="agent-status-badge" onclick="executeCommand('opusflow.selectAgent')" title="Click to Switch Agent">
+            <div class="agent-icon gemini" id="current-agent-icon">G</div>
+            <div class="status-dot disconnected" id="current-agent-status"></div>
         </div>
     </div>
 

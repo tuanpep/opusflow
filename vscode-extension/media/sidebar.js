@@ -8,7 +8,8 @@ let state = {
     planPath: null,
     taskQueue: null,
     tasksCompleted: 0,
-    tasksTotal: 0
+    tasksTotal: 0,
+    auth: {}
 };
 
 // Initialize
@@ -20,6 +21,9 @@ document.addEventListener('DOMContentLoaded', () => {
     if (previousState) {
         state = { ...state, ...previousState };
         updateUI();
+        if (state.auth) {
+            updateAuthUI(state.auth);
+        }
     }
 
     // Notify extension we're ready
@@ -107,6 +111,32 @@ function updateUI() {
     updateArtifacts(state);
 }
 
+function updateAuthUI(authState) {
+    if (!authState) return;
+
+    const badge = document.getElementById('agent-status-badge');
+    const icon = document.getElementById('current-agent-icon');
+    const statusDot = document.getElementById('current-agent-status');
+
+    if (badge && icon && statusDot) {
+        const currentAgent = authState.currentAgent || 'gemini';
+
+        // Update Icon
+        icon.className = 'agent-icon ' + currentAgent;
+        icon.textContent = currentAgent.charAt(0).toUpperCase();
+
+        // Update Status Dot
+        let isConnected = false;
+        if (currentAgent === 'gemini') isConnected = authState['gemini-cli'];
+        else if (currentAgent === 'cursor') isConnected = authState['cursor-agent'];
+
+        statusDot.className = 'status-dot ' + (isConnected ? 'connected' : 'disconnected');
+
+        // Update title
+        badge.title = `Current Agent: ${currentAgent.charAt(0).toUpperCase() + currentAgent.slice(1)} (${isConnected ? 'Connected' : 'Disconnected'})`;
+    }
+}
+
 // Message handling from Extension
 window.addEventListener('message', event => {
     const message = event.data;
@@ -130,8 +160,13 @@ window.addEventListener('message', event => {
             updateArtifacts(message.artifacts);
             break;
 
+        case 'updateState':
+            state = { ...state, auth: message.value.auth };
+            vscode.setState(state);
+            updateAuthUI(message.value.auth);
+            break;
+
         case 'showMessage':
-            // Could show toast or notification in webview
             console.log(message.text);
             break;
     }

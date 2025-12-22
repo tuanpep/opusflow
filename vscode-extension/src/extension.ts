@@ -3,6 +3,7 @@ import * as path from 'path';
 import { AuthManager } from './auth/authManager';
 import { AgentAuth } from './auth/agentAuth';
 import { SidebarProvider } from './SidebarProvider';
+import { AuthSidebarProvider } from './ui/authSidebar';
 import { FileWatcher } from './utils/fileWatcher';
 import { OpusFlowExplorerProvider } from './ui/opusflowExplorer';
 import { OpusFlowWrapper } from './cli/opusflowWrapper';
@@ -20,8 +21,11 @@ interface OpusFlowExtensionContext {
     currentAgent: string | undefined;
     authManager: AuthManager;
     fileWatcher: FileWatcher;
+
     cli: OpusFlowWrapper;
     webviewProvider: WebviewProvider;
+    authSidebarProvider: AuthSidebarProvider;
+    sidebarProvider: SidebarProvider;
 }
 
 export function activate(context: vscode.ExtensionContext) {
@@ -50,6 +54,18 @@ export function activate(context: vscode.ExtensionContext) {
     // Initialize Webview Provider
     const webviewProvider = new WebviewProvider(context.extensionUri);
 
+    // Initialize Auth Sidebar
+    const authSidebarProvider = new AuthSidebarProvider(context.extensionUri, authManager);
+    context.subscriptions.push(
+        vscode.window.registerWebviewViewProvider(AuthSidebarProvider.viewType, authSidebarProvider)
+    );
+
+    // Initialize Sidebar
+    const sidebarProvider = new SidebarProvider(context.extensionUri, authManager);
+    context.subscriptions.push(
+        vscode.window.registerWebviewViewProvider(SidebarProvider.viewType, sidebarProvider)
+    );
+
     // Store extension context
     const extensionContext: OpusFlowExtensionContext = {
         statusBarItem,
@@ -58,18 +74,22 @@ export function activate(context: vscode.ExtensionContext) {
         authManager,
         fileWatcher,
         cli,
-        webviewProvider
+        webviewProvider,
+        authSidebarProvider,
+        sidebarProvider
     };
 
     // Initialize Tree View
     const explorerProvider = new OpusFlowExplorerProvider(fileWatcher);
     vscode.window.registerTreeDataProvider('opusflowExplorer', explorerProvider);
 
-    // Initialize Sidebar
-    const sidebarProvider = new SidebarProvider(context.extensionUri, authManager);
-    context.subscriptions.push(
-        vscode.window.registerWebviewViewProvider(SidebarProvider.viewType, sidebarProvider)
-    );
+
+
+
+    // Set initial agent
+    if (extensionContext.currentAgent) {
+        authSidebarProvider.setAgent(extensionContext.currentAgent);
+    }
 
     // Register commands
     registerCommands(context, extensionContext, explorerProvider);
@@ -161,13 +181,33 @@ function registerCommands(
     // Select Agent command
     const selectAgentCmd = vscode.commands.registerCommand(
         'opusflow.selectAgent',
-        async () => {
+        async (agentId?: string) => {
+            // If agent passed directly (e.g. from Sidebar), use it
+            if (agentId) {
+                // Validate agentId
+                const validAgents = ['prompt', 'gemini', 'cursor'];
+                if (validAgents.includes(agentId)) { // Allow loose matching or strict? 
+                    // Update state
+                    extensionContext.currentAgent = agentId;
+                    extensionContext.statusBarItem.text = `$(rocket) OpusFlow [${agentId}]`;
+                    extensionContext.outputChannel.appendLine(`Selected agent: ${agentId}`);
+                    // Update sidebar UI
+                    extensionContext.authSidebarProvider.setAgent(agentId);
+
+                    // Update Main Sidebar UI
+                    extensionContext.sidebarProvider.updateAgentStatus(agentId, false); // Default to false until we check connection, or check it here
+
+                    vscode.window.showInformationMessage(`Selected agent: ${agentId}`);
+                    return;
+                }
+            }
+
             const authStatuses = await extensionContext.authManager.checkSessions();
 
             const agents = [
-                { label: 'aider', description: 'AI pair programming tool' },
-                { label: 'claude-code', description: 'Claude Code CLI' },
-                { label: 'prompt', description: 'Generate prompt only' }
+                { label: 'gemini', description: 'Gemini CLI' },
+                { label: 'cursor', description: 'Cursor Agent' },
+                { label: 'prompt', description: 'Generate prompt only' },
             ];
 
             const selected = await vscode.window.showQuickPick(agents, {
@@ -179,6 +219,10 @@ function registerCommands(
                 extensionContext.currentAgent = agent;
                 extensionContext.statusBarItem.text = `$(rocket) OpusFlow [${agent}]`;
                 extensionContext.outputChannel.appendLine(`Selected agent: ${agent}`);
+
+                // Update sidebar UI
+                extensionContext.authSidebarProvider.setAgent(agent);
+
                 vscode.window.showInformationMessage(`Selected agent: ${agent}`);
             }
         }

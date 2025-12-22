@@ -19,6 +19,13 @@ export class AuthSidebarProvider implements vscode.WebviewViewProvider {
         private readonly _authManager: AuthManager
     ) { }
 
+    private _currentAgent: string = 'prompt';
+
+    public setAgent(agent: string) {
+        this._currentAgent = agent;
+        this._updateWebview();
+    }
+
     public resolveWebviewView(
         webviewView: vscode.WebviewView,
         _context: vscode.WebviewViewResolveContext,
@@ -44,6 +51,9 @@ export class AuthSidebarProvider implements vscode.WebviewViewProvider {
                     break;
                 case 'refresh':
                     await this._updateWebview();
+                    break;
+                case 'select':
+                    await this._handleSelect(message.provider);
                     break;
             }
         });
@@ -92,11 +102,37 @@ export class AuthSidebarProvider implements vscode.WebviewViewProvider {
         }
     }
 
+    private async _handleSelect(provider: AuthProviderType): Promise<void> {
+        // Map provider type to agent string ID expected by extension
+        let agentId = 'prompt';
+        switch (provider) {
+            case AuthProviderType.Cursor: agentId = 'cursor'; break; // Note: extension uses 'cursor' or 'aider'? Package.json says 'aider', 'claude-code', 'prompt'. But CursorAuth is 'cursor'. 
+            // Wait, package.json says keys are 'aider', 'claude-code', 'prompt'. 
+            // CursorAuth type is 'cursor-agent'.
+            // Let's assume 'cursor' for now, or check what Select Agent uses.
+            // Select Agent uses 'aider', 'claude-code', 'prompt'.
+            // Does it support 'cursor'? The selectAgent command in extension.ts only lists those 3.
+            // I should probably add 'cursor' to selectAgent list in extension.ts too if it's supported.
+            // For now, let's map: 
+            // Gemini -> 'gemini' (not in list?)
+            // Claude -> 'claude-code'
+
+            // Actually, I should trigger the command execution so extension.ts handles the state update
+
+            case AuthProviderType.Gemini: agentId = 'gemini'; break;
+        }
+
+        // Execute the selectAgent command but we need to pass the agent.
+        // The command currently shows a QuickPick. I should overload it or update extension.ts to accept an arg.
+        // For now, I'll just post a message to extension (handled in resolveWebviewView? No, I need to call a command).
+
+        vscode.commands.executeCommand('opusflow.selectAgent', agentId);
+    }
+
     private _getAgentName(provider: AuthProviderType): string {
         switch (provider) {
             case AuthProviderType.Cursor: return 'Cursor';
             case AuthProviderType.Gemini: return 'Gemini';
-            case AuthProviderType.Claude: return 'Claude';
             default: return provider;
         }
     }
@@ -121,7 +157,6 @@ export class AuthSidebarProvider implements vscode.WebviewViewProvider {
     ): string {
         const cursorAuth = authStatuses.get(AuthProviderType.Cursor);
         const geminiAuth = authStatuses.get(AuthProviderType.Gemini);
-        const claudeAuth = authStatuses.get(AuthProviderType.Claude);
 
         return `<!DOCTYPE html>
 <html lang="en">
@@ -208,8 +243,7 @@ export class AuthSidebarProvider implements vscode.WebviewViewProvider {
         
         .agent-icon.cursor { background: #333; }
         .agent-icon.gemini { background: linear-gradient(135deg, #4285f4, #34a853); }
-        .agent-icon.claude { background: #d97757; }
-        
+
         .agent-info {
             flex: 1;
             min-width: 0;
@@ -231,6 +265,22 @@ export class AuthSidebarProvider implements vscode.WebviewViewProvider {
             border-radius: 10px;
             font-weight: 700;
             text-transform: uppercase;
+        }
+
+        .selected-badge {
+            background: var(--vscode-focusBorder);
+            color: white;
+            font-size: 9px;
+            padding: 1px 5px;
+            border-radius: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            margin-left: auto;
+        }
+        
+        .agent-card.selected {
+            border: 2px solid var(--vscode-focusBorder);
+            background: var(--vscode-list-activeSelectionBackground);
         }
         
         .agent-desc {
@@ -401,13 +451,14 @@ export class AuthSidebarProvider implements vscode.WebviewViewProvider {
                 </button>
             `}
         </div>
-        
-        <!-- Gemini -->
-        <div class="agent-card ${geminiAuth ? 'connected' : ''}" id="gemini-card">
+        <div class="agent-card ${geminiAuth ? 'connected' : ''} ${this._currentAgent === 'gemini' ? 'selected' : ''}" id="gemini-card">
             <div class="agent-header">
                 <div class="agent-icon gemini">G</div>
                 <div class="agent-info">
-                    <div class="agent-name">Gemini</div>
+                    <div class="agent-name">
+                        Gemini
+                        ${this._currentAgent === 'gemini' ? '<span class="selected-badge">Active</span>' : ''}
+                    </div>
                     <div class="agent-desc">Google AI</div>
                 </div>
             </div>
@@ -417,34 +468,11 @@ export class AuthSidebarProvider implements vscode.WebviewViewProvider {
             </div>
             ${geminiAuth ? `
                 <div class="btn-group">
-                    <button class="btn btn-secondary" onclick="refresh()">Refresh</button>
+                    ${this._currentAgent !== 'gemini' ? `<button class="btn btn-primary" onclick="select('gemini-cli')">Use</button>` : ''}
                     <button class="btn btn-secondary" onclick="logout('gemini-cli')">Logout</button>
                 </div>
             ` : `
                 <button class="btn btn-primary" onclick="login('gemini-cli')">Connect</button>
-            `}
-        </div>
-        
-        <!-- Claude -->
-        <div class="agent-card ${claudeAuth ? 'connected' : ''}" id="claude-card">
-            <div class="agent-header">
-                <div class="agent-icon claude">A</div>
-                <div class="agent-info">
-                    <div class="agent-name">Claude</div>
-                    <div class="agent-desc">Anthropic AI</div>
-                </div>
-            </div>
-            <div class="status ${claudeAuth ? 'connected' : 'disconnected'}">
-                <span class="status-dot"></span>
-                ${claudeAuth ? 'Connected' : 'Not connected'}
-            </div>
-            ${claudeAuth ? `
-                <div class="btn-group">
-                    <button class="btn btn-secondary" onclick="refresh()">Refresh</button>
-                    <button class="btn btn-secondary" onclick="logout('claude-cli')">Logout</button>
-                </div>
-            ` : `
-                <button class="btn btn-primary" onclick="login('claude-cli')">Connect</button>
             `}
         </div>
     </div>
@@ -467,6 +495,10 @@ export class AuthSidebarProvider implements vscode.WebviewViewProvider {
         
         function logout(provider) {
             vscode.postMessage({ command: 'logout', provider });
+        }
+
+        function select(provider) {
+            vscode.postMessage({ command: 'select', provider });
         }
         
         function refresh() {

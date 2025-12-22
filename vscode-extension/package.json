@@ -2,7 +2,7 @@
   "name": "vscode-opusflow",
   "displayName": "OpusFlow",
   "description": "VSCode extension for OpusFlow - Spec-Driven Development with AI agents",
-  "version": "0.5.0",
+  "version": "0.5.1",
   "publisher": "opusflow",
   "engines": {
     "vscode": "^1.104.0"
@@ -19,8 +19,7 @@
     "sdd",
     "spec-driven",
     "cursor",
-    "claude",
-    "aider"
+    "gemini"
   ],
   "repository": {
     "type": "git",
@@ -133,6 +132,12 @@
           "icon": "$(comment-discussion)"
         },
         {
+          "type": "webview",
+          "id": "opusflowAuth",
+          "name": "Agent Status",
+          "icon": "$(lock)"
+        },
+        {
           "id": "opusflowExplorer",
           "name": "Specs, Plans & Tasks",
           "icon": "resources/opusflow-icon.svg"
@@ -150,27 +155,16 @@
         "opusflow.defaultAgent": {
           "type": "string",
           "enum": [
-            "aider",
-            "claude-code",
-            "prompt"
+            "cursor",
+            "gemini"
           ],
-          "default": "prompt",
+          "default": "gemini",
           "description": "Default AI agent for task execution"
         },
         "opusflow.autoRefresh": {
           "type": "boolean",
           "default": true,
           "description": "Auto-refresh UI when files change"
-        },
-        "opusflow.apiKeys.anthropic": {
-          "type": "string",
-          "default": "",
-          "markdownDescription": "Anthropic API key for **Aider** and **Claude Code**. Get yours at [console.anthropic.com](https://console.anthropic.com/)"
-        },
-        "opusflow.apiKeys.openai": {
-          "type": "string",
-          "default": "",
-          "markdownDescription": "OpenAI API key for **Aider** with GPT models. Get yours at [platform.openai.com](https://platform.openai.com/api-keys)"
         },
         "opusflow.apiKeys.gemini": {
           "type": "string",

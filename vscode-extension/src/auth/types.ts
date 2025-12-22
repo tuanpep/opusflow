@@ -1,7 +1,6 @@
 export enum AuthProviderType {
     Cursor = 'cursor-agent',
-    Gemini = 'gemini-cli',
-    Claude = 'claude-cli'
+    Gemini = 'gemini-cli'
 }
 
 export interface AuthSession {

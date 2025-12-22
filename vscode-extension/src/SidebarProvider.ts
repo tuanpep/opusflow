@@ -189,7 +189,14 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
         });
     }
 
-    private async _updateWebviewState() {
+    public async updateAgentStatus(agentId: string, connected: boolean) {
+        if (!this._view) return;
+
+        // We need full auth state + current agent
+        await this._updateWebviewState(agentId);
+    }
+
+    private async _updateWebviewState(currentAgent?: string) {
         if (!this._view) return;
 
         const authStatuses = await this._authManager.checkSessions();
@@ -198,6 +205,13 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
         authStatuses.forEach((val, key) => {
             authState[key] = val;
         });
+
+        // Inject current agent if provided, otherwise try to get from config or context
+        if (currentAgent) {
+            authState.currentAgent = currentAgent;
+        } else {
+            authState.currentAgent = vscode.workspace.getConfiguration('opusflow').get('defaultAgent') || 'gemini';
+        }
 
         this._view.webview.postMessage({
             type: "updateState",

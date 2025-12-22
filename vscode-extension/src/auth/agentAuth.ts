@@ -4,8 +4,7 @@ import * as vscode from 'vscode';
  * Simple API key management for AI coding agents
  * 
  * Supported agents:
- * - Aider: Uses ANTHROPIC_API_KEY or OPENAI_API_KEY
- * - Claude Code: Uses ANTHROPIC_API_KEY  
+ * Supported agents:
  * - Gemini CLI: Uses GEMINI_API_KEY
  * - Cursor: Uses MCP integration (no API key needed here)
  */
@@ -23,12 +22,8 @@ export class AgentAuth {
         const config = vscode.workspace.getConfiguration('opusflow.apiKeys');
         const env: Record<string, string> = {};
 
-        const anthropic = config.get<string>('anthropic');
-        const openai = config.get<string>('openai');
         const gemini = config.get<string>('gemini');
 
-        if (anthropic) env['ANTHROPIC_API_KEY'] = anthropic;
-        if (openai) env['OPENAI_API_KEY'] = openai;
         if (gemini) env['GEMINI_API_KEY'] = gemini;
 
         return env;
@@ -42,21 +37,6 @@ export class AgentAuth {
 
         return [
             {
-                agent: 'Aider (Anthropic)',
-                configured: !!config.get<string>('anthropic'),
-                envVar: 'ANTHROPIC_API_KEY'
-            },
-            {
-                agent: 'Aider (OpenAI)',
-                configured: !!config.get<string>('openai'),
-                envVar: 'OPENAI_API_KEY'
-            },
-            {
-                agent: 'Claude Code',
-                configured: !!config.get<string>('anthropic'),
-                envVar: 'ANTHROPIC_API_KEY'
-            },
-            {
                 agent: 'Gemini CLI',
                 configured: !!config.get<string>('gemini'),
                 envVar: 'GEMINI_API_KEY'
@@ -69,8 +49,6 @@ export class AgentAuth {
      */
     async setupApiKeys(): Promise<void> {
         const agents = [
-            { label: '🤖 Anthropic (for Aider & Claude Code)', key: 'anthropic', url: 'https://console.anthropic.com/' },
-            { label: '🧠 OpenAI (for Aider with GPT)', key: 'openai', url: 'https://platform.openai.com/api-keys' },
             { label: '✨ Gemini (for Gemini CLI)', key: 'gemini', url: 'https://aistudio.google.com/' },
             { label: '📋 Show Status', key: 'status', url: '' }
         ];
