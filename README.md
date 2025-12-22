@@ -131,6 +131,10 @@ If you prefer strict separation, you can initialize OpusFlow inside each reposit
 
 ---
 
+## 🤝 Contributing
+
+Contributions are welcome! Please see **[CONTRIBUTING.md](CONTRIBUTING.md)** for development setup and contribution guidelines.
+
 ## 📄 License
 
 MIT License. See [LICENSE](LICENSE) for details.
