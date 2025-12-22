@@ -37,7 +37,33 @@ snapshot:
 
 changelog:
   sort: asc
+  groups:
+    - title: '🚀 Features'
+      regexp: '^.*?feat(\([[:word:]]+\))??!?:.+$'
+      order: 0
+    - title: '🐛 Bug Fixes'
+      regexp: '^.*?fix(\([[:word:]]+\))??!?:.+$'
+      order: 1
+    - title: '⚡ Performance'
+      regexp: '^.*?perf(\([[:word:]]+\))??!?:.+$'
+      order: 2
+    - title: '♻️ Refactor'
+      regexp: '^.*?refactor(\([[:word:]]+\))??!?:.+$'
+      order: 3
+    - title: '📦 Other'
+      order: 999
   filters:
     exclude:
       - '^docs:'
       - '^test:'
+      - '^ci:'
+      - '^chore:'
+
+release:
+  # GoReleaser will create the release
+  github:
+    owner: tuanpep
+    name: oplusflow
+  draft: false
+  prerelease: auto
+  name_template: "Release {{.Tag}}"

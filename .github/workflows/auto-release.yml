@@ -12,6 +12,13 @@ permissions:
 jobs:
   auto-release:
     runs-on: ubuntu-latest
+    # Skip release for docs, test, ci, and chore commits
+    if: |
+      !startsWith(github.event.head_commit.message, 'docs:') &&
+      !startsWith(github.event.head_commit.message, 'test:') &&
+      !startsWith(github.event.head_commit.message, 'ci:') &&
+      !startsWith(github.event.head_commit.message, 'chore:') &&
+      !contains(github.event.head_commit.message, '[skip-release]')
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -24,11 +31,6 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           default_bump: patch
-
-      - name: Fetch and checkout tag
-        run: |
-          git fetch --tags
-          git checkout ${{ steps.tag_version.outputs.new_tag }}
 
       - name: Set up Go
         uses: actions/setup-go@v5
@@ -44,10 +46,3 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GORELEASER_CURRENT_TAG: ${{ steps.tag_version.outputs.new_tag }}
-
-      - name: Create a GitHub release
-        uses: ncipollo/release-action@v1
-        with:
-          tag: ${{ steps.tag_version.outputs.new_tag }}
-          name: Release ${{ steps.tag_version.outputs.new_tag }}
-          body: ${{ steps.tag_version.outputs.changelog }}

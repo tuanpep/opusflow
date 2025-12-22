@@ -9,10 +9,9 @@ import (
 var Version = "dev"
 
 var rootCmd = &cobra.Command{
-	Use:     "opusflow",
-	Short:   "OpusFlow Workflow CLI",
-	Long:    `OpusFlow: A spec-driven development tool to orchestrate coding agents.`,
-	Version: Version,
+	Use:   "opusflow",
+	Short: "OpusFlow Workflow CLI",
+	Long:  `OpusFlow: A spec-driven development tool to orchestrate coding agents.`,
 }
 
 func Execute() {
@@ -23,5 +22,6 @@ func Execute() {
 }
 
 func init() {
-	// Global flags can be added here
+	// Set version from ldflags-injected value
+	rootCmd.Version = Version
 }
