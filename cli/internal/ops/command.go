@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"os/exec"
 
-	"github.com/ergonml/opusflow/internal/manager"
+	"github.com/tuanpep/oplusflow/internal/manager"
 )
 
 func RunCommand(command string) (string, error) {

@@ -1,4 +1,4 @@
-module github.com/ergonml/opusflow
+module github.com/tuanpep/oplusflow
 
 go 1.23.0
 

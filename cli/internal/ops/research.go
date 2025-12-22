@@ -9,7 +9,7 @@ import (
 	"strings"
 	"unicode/utf8"
 
-	"github.com/ergonml/opusflow/internal/manager"
+	"github.com/tuanpep/oplusflow/internal/manager"
 	ignore "github.com/sabhiram/go-gitignore"
 )
 

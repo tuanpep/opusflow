@@ -1,6 +1,6 @@
 package main
 
-import "github.com/ergonml/opusflow/cmd"
+import "github.com/tuanpep/oplusflow/cmd"
 
 func main() {
 	cmd.Execute()

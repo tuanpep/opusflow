@@ -9,8 +9,8 @@ import (
 	"strings"
 	"text/template"
 
-	"github.com/ergonml/opusflow/internal/manager"
-	"github.com/ergonml/opusflow/internal/templates"
+	"github.com/tuanpep/oplusflow/internal/manager"
+	"github.com/tuanpep/oplusflow/internal/templates"
 )
 
 // CreatePlanResult contains the created plan's filename and full path

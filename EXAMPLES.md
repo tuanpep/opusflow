@@ -54,7 +54,7 @@ The Agent explores the codebase to understand where to add the file.
 
 **Tools Used**:
 - `list_files(dir="cli")`: To see the directory structure.
-- `read_file(path="cli/go.mod")`: To understand the module name (`github.com/ergonml/opusflow`).
+- `read_file(path="cli/go.mod")`: To understand the module name (`github.com/tuanpep/oplusflow`).
 
 ### 2. File-Level Plan
 
@@ -113,7 +113,7 @@ The Agent executes the tests to ensure correctness using the **`run_command`** t
 
 **Result**:
 ```
-ok      github.com/ergonml/opusflow/cli/pkg/utils    0.001s
+ok      github.com/tuanpep/oplusflow/cli/pkg/utils    0.001s
 ```
 
 ---

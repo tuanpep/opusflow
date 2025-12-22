@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/ergonml/opusflow/internal/ops"
+	"github.com/tuanpep/oplusflow/internal/ops"
 	"github.com/spf13/cobra"
 )
 

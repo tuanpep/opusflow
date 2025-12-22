@@ -27,7 +27,7 @@ Download the latest release for your platform from the [Releases Page](https://g
 
 ### Option 3: Go Install
 ```bash
-go install github.com/ergonml/opusflow/cli@latest
+go install github.com/tuanpep/oplusflow/cli@latest
 ```
 
 ---

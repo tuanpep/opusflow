@@ -10,7 +10,7 @@ builds:
     env:
       - CGO_ENABLED=0
     ldflags:
-      - -s -w -X github.com/ergonml/opusflow/cmd.Version={{.Version}}
+      - -s -w -X github.com/tuanpep/oplusflow/cmd.Version={{.Version}}
     goos:
       - linux
       - windows

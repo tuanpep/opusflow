@@ -7,7 +7,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/ergonml/opusflow/internal/manager"
+	"github.com/tuanpep/oplusflow/internal/manager"
 	"github.com/spf13/cobra"
 )
 
