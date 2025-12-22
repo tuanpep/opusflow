@@ -34,13 +34,22 @@ The easiest way to use OpusFlow is via the CLI.
 
 ### 1. Installation
 
-**Option A: Download Binary (Recommended)**
-1.  Download the latest release for your OS from the [Releases Page](https://github.com/ergonml/opusflow/releases).
+### 1. Installation
+
+**Option A: One-Line Install (Mac & Linux)**
+```bash
+curl -sL https://raw.githubusercontent.com/tuanpep/oplusflow/main/install.sh | bash
+```
+
+**Option B: Download Binary Manually**
+1.  Download the latest release for your OS from the [Releases Page](https://github.com/tuanpep/oplusflow/releases).
 2.  Unzip the file and place the binary in your path.
 
-**Option B: Install from Source**
+**Option C: Install from Source**
 ```bash
 cd opusflow/cli
+make build
+# or/
 go install .
 ```
 
