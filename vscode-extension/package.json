@@ -121,7 +121,7 @@
         },
         {
           "command": "opusflow.verifyPlan",
-          "when": "view == opusflowExplorer && viewItem == file",
+          "when": "view == opusflowExplorer && viewItem == plan",
           "group": "inline"
         },
         {

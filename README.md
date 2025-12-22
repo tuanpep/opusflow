@@ -67,31 +67,50 @@ A TypeScript-based VSCode extension for visual workflow orchestration.
 
 ## 🎯 How It Works
 
-OpusFlow implements a **plan-first development workflow**:
+OpusFlow implements a **Spec-Driven Development (SDD)** workflow:
 
-### 1. **Create a Plan**
+### 1. **Understand the Codebase**
 ```bash
-opusflow plan "Implement feature X"
+opusflow map                              # Generate codebase symbol map
 ```
-Creates a structured plan in `opusflow-planning/plans/`
+The Librarian indexes your project in ~2k tokens vs 200k for full source.
 
-### 2. **Generate AI Prompts**
+### 2. **Create a Specification**
 ```bash
-opusflow prompt plan plan-20231222.md
+opusflow spec "Add OAuth2 authentication"  # Create SPEC.md
 ```
-Generates context-rich prompts for your AI agent
+The Architect defines WHAT to build (requirements, edge cases, success criteria).
 
-### 3. **Execute with AI**
-Use the generated prompt with your favorite AI agent (Cursor, Claude, Gemini)
-
-### 4. **Verify Implementation**
+### 3. **Create a Plan**
 ```bash
-opusflow verify plan-20231222.md
+opusflow plan "Implement OAuth2"          # Create PLAN.md
 ```
-Automatically checks if implementation matches the plan
+Generates step-by-step implementation instructions.
 
-### 5. **Iterate**
-Review verification results and iterate as needed
+### 4. **Decompose into Tasks**
+```bash
+opusflow decompose plan-*.md              # Break into atomic tasks
+```
+The Commander creates a task queue with dependencies.
+
+### 5. **Execute with AI**
+```bash
+opusflow exec next plan-*.md --agent aider  # Execute tasks
+```
+The Builder hands off to external agents (Aider, Claude Code).
+
+### 6. **Verify Implementation**
+```bash
+opusflow verify plan-*.md                 # Auto-verify
+```
+The Critic checks build, tests, and plan adherence.
+
+### Workflow Management
+```bash
+opusflow workflow start "Feature X"       # Start new workflow
+opusflow workflow status                  # Check current state
+opusflow workflow next                    # Get guidance
+```
 
 ---
 

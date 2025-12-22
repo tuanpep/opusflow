@@ -48,9 +48,15 @@ export class OpusFlowExplorerProvider implements vscode.TreeDataProvider<Plannin
                     // Check for related verifications if this is a plan
                     let hasVerification = false;
                     if (isPlan) {
-                        const verifyFile = `verify-${file}`;
-                        const verifyPath = path.join(planningDir, 'verifications', verifyFile);
-                        hasVerification = fs.existsSync(verifyPath);
+                        const verificationsDir = path.join(planningDir, 'verifications');
+                        if (fs.existsSync(verificationsDir)) {
+                            // Plan file: "my-feature.md" -> verify prefix: "verify-my-feature"
+                            const planName = path.parse(file).name;
+                            const verifyPrefix = `verify-${planName}`;
+
+                            const verifyFiles = fs.readdirSync(verificationsDir);
+                            hasVerification = verifyFiles.some(f => f.startsWith(verifyPrefix));
+                        }
                     }
 
                     return new PlanningItem(
@@ -65,21 +71,26 @@ export class OpusFlowExplorerProvider implements vscode.TreeDataProvider<Plannin
                     );
                 });
             } else if (element.contextValue === 'plan') {
-                // Return verification file as child of the plan
-                const verifyFile = `verify-${element.label}`;
-                const verifyPath = path.join(planningDir, 'verifications', verifyFile);
+                // Return verification files as children of the plan
+                const verificationsDir = path.join(planningDir, 'verifications');
 
-                if (fs.existsSync(verifyPath)) {
-                    return [new PlanningItem(
-                        verifyFile,
+                if (fs.existsSync(verificationsDir)) {
+                    const planName = path.parse(element.label).name;
+                    const verifyPrefix = `verify-${planName}`;
+
+                    const verifyFiles = fs.readdirSync(verificationsDir)
+                        .filter(f => f.startsWith(verifyPrefix));
+
+                    return verifyFiles.map(f => new PlanningItem(
+                        f,
                         vscode.TreeItemCollapsibleState.None,
                         {
                             command: 'vscode.open',
                             title: 'Open Verification',
-                            arguments: [vscode.Uri.file(verifyPath)]
+                            arguments: [vscode.Uri.file(path.join(verificationsDir, f))]
                         },
                         'verification'
-                    )];
+                    ));
                 }
                 return [];
             }

@@ -2,8 +2,7 @@ import * as vscode from 'vscode';
 import * as path from 'path';
 import * as fs from 'fs';
 import { AuthManager } from './auth/authManager';
-import { AuthWebview } from './ui/authWebview';
-import { ChatSidebarProvider } from './ui/chatSidebar'; // New Provider
+import { SidebarProvider } from './SidebarProvider'; // New Planning Sidebar
 import { AuthProviderType } from './auth/types';
 import { FileWatcher } from './utils/fileWatcher';
 import { OpusFlowExplorerProvider } from './ui/opusflowExplorer';
@@ -43,7 +42,9 @@ export function activate(context: vscode.ExtensionContext) {
     context.subscriptions.push(fileWatcher);
 
     // Initialize CLI Wrapper
-    const cli = new OpusFlowWrapper();
+    const config = vscode.workspace.getConfiguration('opusflow');
+    const cliPath = config.get<string>('cliPath') || 'opusflow';
+    const cli = new OpusFlowWrapper(cliPath);
 
     // Initialize Webview Provider
     const webviewProvider = new WebviewProvider(context.extensionUri);
@@ -64,9 +65,9 @@ export function activate(context: vscode.ExtensionContext) {
     vscode.window.registerTreeDataProvider('opusflowExplorer', explorerProvider);
 
     // Initialize Chat Sidebar (Replaces Auth Sidebar)
-    const chatSidebarProvider = new ChatSidebarProvider(context.extensionUri, authManager, cli);
+    const sidebarProvider = new SidebarProvider(context.extensionUri, authManager);
     context.subscriptions.push(
-        vscode.window.registerWebviewViewProvider(ChatSidebarProvider.viewType, chatSidebarProvider)
+        vscode.window.registerWebviewViewProvider(SidebarProvider.viewType, sidebarProvider)
     );
 
     // Register commands
@@ -176,11 +177,11 @@ function registerCommands(
         }
     );
 
-    // Authenticate Agent command (still accessible via command palette/logic, though removed from sidebar view)
+    // Authenticate Agent command (Refocuses to Sidebar)
     const authenticateAgentCmd = vscode.commands.registerCommand(
         'opusflow.authenticateAgent',
         () => {
-            AuthWebview.show(context, extensionContext.authManager);
+            vscode.commands.executeCommand('opusflowChat.focus');
         }
     );
 

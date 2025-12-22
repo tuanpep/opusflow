@@ -2,69 +2,69 @@ package cmd
 
 import (
 	"fmt"
-	"os"
-	"path/filepath"
-	"strings"
-	"time"
 
-	"github.com/tuanpep/oplusflow/internal/manager"
 	"github.com/spf13/cobra"
+	"github.com/tuanpep/oplusflow/internal/ops"
 )
 
 var verifyCmd = &cobra.Command{
 	Use:   "verify [plan-file]",
-	Short: "Create a verification report for a plan",
-	Args:  cobra.MinimumNArgs(1),
-	Run: func(cmd *cobra.Command, args []string) {
+	Short: "Verify implementation against a plan",
+	Long: `Verify that the implementation matches the plan.
+
+The Critic phase checks:
+- Build status
+- Test status  
+- Files mentioned in plan exist
+- Git diff summary
+
+Examples:
+  opusflow verify plan-01-auth.md           # Auto verify
+  opusflow verify plan.md --prompt          # Generate LLM prompt
+  opusflow verify plan.md --spec spec.md    # Include spec context`,
+	Args: cobra.MinimumNArgs(1),
+	RunE: func(cmd *cobra.Command, args []string) error {
 		planFile := args[0]
-		// Normalize plan file name
-		planFile = filepath.Base(planFile)
 
-		rootDir, err := manager.FindProjectRoot()
-		if err != nil {
-			fmt.Printf("Error: %v\n", err)
-			return
+		generatePrompt, _ := cmd.Flags().GetBool("prompt")
+		specFile, _ := cmd.Flags().GetString("spec")
+
+		if generatePrompt {
+			// Generate LLM verification prompt
+			diffContent, _ := ops.RunCommand("git diff HEAD")
+			prompt, err := ops.GenerateVerificationPrompt(planFile, specFile, diffContent)
+			if err != nil {
+				return fmt.Errorf("failed to generate prompt: %w", err)
+			}
+			fmt.Println(prompt)
+			return nil
 		}
 
-		_, verifyDir, err := manager.GetPlanningDirs(rootDir)
+		// Run automated verification
+		fmt.Println("Running automated verification...")
+		result, err := ops.AutoVerifyPlan(planFile)
 		if err != nil {
-			fmt.Printf("Error: %v\n", err)
-			return
+			return fmt.Errorf("verification failed: %w", err)
 		}
 
-		date := time.Now().Format("2006-01-02")
-		verifyFilename := fmt.Sprintf("verify-%s-%s.md", strings.TrimSuffix(planFile, ".md"), date)
-		fullPath := filepath.Join(verifyDir, verifyFilename)
-
-		content := fmt.Sprintf(`---
-Plan: %s
-Date: %s
----
-
-# Verification Report
-
-## Summary
-[Summarize the verification results here]
-
-## Checklist
-- [ ] Plan adherence
-- [ ] Build consistency
-- [ ] Test coverage
-
-## Issues
-(No issues found yet)
-`, planFile, date)
-
-		err = os.WriteFile(fullPath, []byte(content), 0644)
+		// Save report
+		reportPath, err := result.Save()
 		if err != nil {
-			fmt.Printf("Error writing file: %v\n", err)
-			return
+			fmt.Printf("Warning: couldn't save report: %v\n", err)
+		} else {
+			fmt.Printf("📄 Report saved: %s\n\n", reportPath)
 		}
 
-		fmt.Printf("Verification report created: %s\n", fullPath)
+		// Display result
+		fmt.Println(result.FormatMarkdown())
+
+		return nil
 	},
 }
 
 func init() {
 	rootCmd.AddCommand(verifyCmd)
+
+	verifyCmd.Flags().Bool("prompt", false, "Generate an LLM verification prompt instead of auto-verifying")
+	verifyCmd.Flags().String("spec", "", "Path to the spec file for additional context")
 }
