@@ -15,7 +15,11 @@ var planCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		title := strings.Join(args, " ")
 
-		result, err := ops.CreatePlan(title)
+		// For CLI usage, we default the goal to the title or empty if we don't prompt for it.
+		// A better CLI experience might flag for it. For now, let's just use the title as the goal.
+		goal := title
+
+		result, err := ops.CreatePlan(title, goal)
 		if err != nil {
 			fmt.Printf("Error: %v\n", err)
 			return

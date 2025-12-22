@@ -113,7 +113,7 @@ Each comment MUST follow this exact format:
 
 ### Output File Format
 
-Save verification comments to a new file in the `opusflow-planning/verifications/` directory with the naming pattern:
+Save verification comments to a new file in the `opusflow-planning/verifications/` directory (relative to project root) with the naming pattern:
 `verify-[feature-name]-[YYYY-MM-DD].md`
 
 ### Complete Output Example

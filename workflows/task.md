@@ -56,10 +56,10 @@ The Agent MUST generate a specific **File-Level Plan** in the chat before execut
 ### Step 3: Execute & Verify
 
 **Execute:**
-- Apply changes using `replace_file_content` or `multi_replace_file_content` following the plan above exactly.
+- Apply changes using `write_file` (overwriting the file with new content).
 
 **Verify:**
-- Run relevant tests or build commands immediately.
+- Run relevant tests or build commands immediately using `run_command`.
 - If it fails, fix and retry (looping).
 
 ---

@@ -13,12 +13,13 @@ import (
 	"github.com/ergonml/opusflow/internal/templates"
 )
 
+// CreatePlanResult contains the created plan's filename and full path
 type CreatePlanResult struct {
 	Filename string
 	FullPath string
 }
 
-func CreatePlan(rawTitle string) (*CreatePlanResult, error) {
+func CreatePlan(rawTitle string, goal string) (*CreatePlanResult, error) {
 	title := strings.Join(strings.Fields(rawTitle), "-")
 	// Sanitize title
 	reg, _ := regexp.Compile("[^a-zA-Z0-9-]+")
@@ -49,11 +50,13 @@ func CreatePlan(rawTitle string) (*CreatePlanResult, error) {
 
 	// Template data
 	data := struct {
+		Goal         string
 		Dependencies string
 		Context      string
 		Environment  string
 		Strategy     string
 	}{
+		Goal:         goal,
 		Dependencies: "TBD",
 		Context:      "TBD",
 		Environment:  "TBD",

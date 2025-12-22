@@ -3,6 +3,7 @@ package ops
 import (
 	"fmt"
 	"io/fs"
+	"os"
 	"path/filepath"
 	"sort"
 	"strings"
@@ -74,36 +75,51 @@ func GenerateFileTree(dir string) (string, error) {
 
 	sort.Strings(files)
 
-	// Basic tree generation logic can be complex, let's stick to a simplified
-	// indentation approach which is token efficient for agents to parse.
-	// Actually, agents often prefer the `tree` command output.
-
-	return pathsToTree(files), nil
+	return strings.Join(files, "\n"), nil
 }
 
-func pathsToTree(paths []string) string {
-	// This is a naive implementation; a real tree visualizer is complex.
-	// Instead, we can group by directory to save repeating parent prefixes.
-	// But let's verify if simply returning the list is that bad?
-	// Path: "a/b/c/d.go" (10 chars)
-	// Tree:
-	// a/
-	//   b/
-	//     c/
-	//       d.go
-	// The tree format adds whitespace/indentation tokens.
-	// The list format adds repeated path tokens.
-	// For LLMs, dense lists are often okay, but highly repetitive prefixes waste tokens.
+func ReadFile(path string) (string, error) {
+	root, err := manager.FindProjectRoot()
+	if err != nil {
+		return "", fmt.Errorf("failed to find project root: %w", err)
+	}
 
-	// Let's implement a Compact Tree:
-	// cli/
-	//   cmd/
-	//     main.go
-	//     mcp.go
-	//   internal/
-	//     ops/...
+	// Ensure path is relative to root if it's not absolute, or handle absolute paths carefully
+	// Ideally we want to support both, but safely within root.
+	// For simplicity, let's assume input could be relative or absolute.
 
-	// Check against token limits (heuristic)
-	// If list is small, return list.
-	return strings.Join(paths, "\n")
+	targetPath := path
+	if !filepath.IsAbs(path) {
+		targetPath = filepath.Join(root, path)
+	}
+
+	// Basic safety check: ensure strictly within root?
+	// Developer tool: relax strict confinement for now, but good practice.
+
+	content, err := os.ReadFile(targetPath)
+	if err != nil {
+		return "", err
+	}
+
+	return string(content), nil
+}
+
+func WriteFile(path string, content string) error {
+	root, err := manager.FindProjectRoot()
+	if err != nil {
+		return fmt.Errorf("failed to find project root: %w", err)
+	}
+
+	targetPath := path
+	if !filepath.IsAbs(path) {
+		targetPath = filepath.Join(root, path)
+	}
+
+	// Ensure directory exists
+	dir := filepath.Dir(targetPath)
+	if err := os.MkdirAll(dir, 0755); err != nil {
+		return fmt.Errorf("failed to create directory: %w", err)
+	}
+
+	return os.WriteFile(targetPath, []byte(content), 0644)
 }

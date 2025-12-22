@@ -3,6 +3,9 @@ package templates
 const PlanTemplate = `Follow the below plan verbatim. Trust the files and references.
 Do not re-verify what's written in the plan.
 
+## Goal
+{{ .Goal }}
+
 ## Pre-requisites
 
 - **Dependencies**: {{ .Dependencies }}

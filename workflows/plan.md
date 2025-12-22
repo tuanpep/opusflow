@@ -47,7 +47,7 @@ The Agent generates a comprehensive plan with:
 - **Testing strategy**: How to verify correctness
 
 **Plan Output Format:**
-You MUST save the output to a new file: `/home/tuanbt/ErgonML-PaaS/opusflow-planning/plans/plan-[phase#]-[name].md`.
+You MUST save the output to a new file: `opusflow-planning/plans/plan-[phase#]-[name].md` (relative to project root).
 
 ```markdown
 Follow the below plan verbatim. Trust the files and references.
