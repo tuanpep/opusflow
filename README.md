@@ -96,6 +96,8 @@ OpusFlow provides standardized templates for different scenarios:
 | **[Review](workflows/review.md)** | Quality & Security Audit. | Code Review / Security Hardening |
 | **[Verification](workflows/verification.md)** | QA & Acceptance Testing. | Post-implementation checks |
 
+For a step-by-step walkthrough of a real-world task, see **[EXAMPLES.md](EXAMPLES.md)**.
+
 ---
 
 ## 🏗️ Architecture
@@ -106,6 +108,26 @@ OpusFlow operates locally on your machine.
 *   **Repository**: All state is stored in `opusflow-planning/`, keeping your project portable.
 
 For a deep dive, see [ARCHITECTURE.md](ARCHITECTURE.md).
+
+---
+
+## 📂 Workspace Structure
+
+OpusFlow is flexible and supports both single-repo and multi-repo setups.
+
+### Recommended Setup (Unified Planning)
+For workspaces with multiple services (e.g., `frontend` and `backend`), place the `opusflow-planning` folder at the **root** of your workspace. This allows the Agent to plan and execute across the entire stack simultaneously.
+
+```
+workspace/                  <-- Project Root
+├── .agent/                 <-- Configuration & Workflows
+├── opusflow-planning/      <-- Unified Plans
+├── frontend/               <-- Frontend Service
+└── backend/                <-- Backend Service
+```
+
+### Alternative Setup (Independent Planning)
+If you prefer strict separation, you can initialize OpusFlow inside each repository independently. The Agent will treat them as completely separate projects.
 
 ---
 

@@ -58,6 +58,13 @@ OpusFlow does not use a database. It uses the file system as the source of truth
 *   **Plans**: stored in `opusflow-planning/plans/` (or configured dir).
 *   **Format**: Strict Markdown Templates.
 
+### 4. Project Root Discovery
+To support monorepos and flexible setups, OpusFlow dynamically locates the project root by walking up the directory tree looking for:
+1.  `opusflow-planning/` directory
+2.  `.agent/` directory
+3.  `.git/` directory
+This allows you to nest the tool inside sub-folders or run it from the root of a large monorepo.
+
 ## Workflows
 
 ### The "Deep Dive" Research Flow
