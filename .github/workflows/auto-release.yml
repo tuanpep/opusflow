@@ -32,6 +32,11 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           default_bump: patch
 
+      - name: Fetch new tag
+        run: |
+          git fetch --tags
+          git checkout ${{ steps.tag_version.outputs.new_tag }}
+
       - name: Set up Go
         uses: actions/setup-go@v5
         with:
@@ -45,4 +50,3 @@ jobs:
           args: release --clean
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GORELEASER_CURRENT_TAG: ${{ steps.tag_version.outputs.new_tag }}
