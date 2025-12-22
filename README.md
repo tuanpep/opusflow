@@ -1,167 +1,252 @@
 # OpusFlow
 
-> **Spec-Driven Development for the Age of AI Agents**
+> Plan-first development workflow orchestration with AI agents
 
-OpusFlow is a development orchestration tool designed to bridge the gap between Human Intent and AI Coding Agents (like Claude Desktop, Cursor, or Windsurf). It enforces a **"Plan-First"** philosophy, ensuring complex tasks are executed through a structured **Plan → Execute → Verify** loop rather than ad-hoc chat interactions.
+[![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
+[![Go Version](https://img.shields.io/badge/go-1.21+-blue.svg)](https://golang.org)
+[![VSCode](https://img.shields.io/badge/vscode-extension-blue.svg)](vscode-extension/)
 
-## 🚀 Why OpusFlow?
-
-*   **🚫 Stop Hallucinations**: Agents work better when they follow a strict, improved plan.
-*   **⚡ Parallel Research**: Intelligent context gathering that scans your codebase efficiently using parallel execution.
-*   **🔗 MCP Native**: Built from the ground up to work as a Model Context Protocol (MCP) server, integrating seamlessly with Claude Desktop.
-*   **📂 File-System based**: No databases. Your plans live in your repo as Markdown, version-controlled alongside your code.
+OpusFlow is a comprehensive toolkit for orchestrating AI-assisted development workflows. It combines a powerful CLI tool with a VSCode extension to provide a seamless plan-first development experience.
 
 ---
 
-## 📥 Installation
+## 🚀 Quick Start
 
-> ⚠️ **Important**: Choose **ONE** installation method. Using multiple methods may cause version conflicts.
-
-### Option 1: One-Line Install (Recommended for Mac & Linux)
-The fastest way to get started. Installs the binary to `/usr/local/bin`.
-
+### Install CLI
 ```bash
-curl -sL "https://raw.githubusercontent.com/tuanpep/oplusflow/main/install.sh?v=$(date +%s)" | bash
+curl -fsSL https://raw.githubusercontent.com/tuanpep/opusflow/main/install.sh | bash
 ```
 
-### Option 2: Go Install (For Go developers)
-Installs to `~/go/bin` (or `$GOPATH/bin`).
-
-```bash
-go install github.com/tuanpep/oplusflow/cli@latest
-```
-
-### Option 3: Windows / Manual
-Download the latest release for your platform from the [Releases Page](https://github.com/tuanpep/oplusflow/releases) and add it to your PATH.
-
-### Verify Installation
-
-```bash
-opusflow --version
-# Should show: opusflow version X.Y.Z
-```
-
-### Troubleshooting: Version Mismatch
-
-If `opusflow --version` shows an old version after upgrading:
-
-```bash
-# Check for multiple binaries
-type -a opusflow   # or: which -a opusflow
-
-# If you see multiple paths, remove the old one:
-rm ~/go/bin/opusflow        # If installed via go install
-# or
-sudo rm /usr/local/bin/opusflow  # If installed via install.sh
-```
-
-Then reinstall using your preferred method.
+### Install VSCode Extension
+Download the latest `.vsix` from [releases](https://github.com/tuanpep/opusflow/releases) and install in VSCode.
 
 ---
 
-## 🤖 Configuration (For AI Agents)
+## 📦 What's Inside
 
-To enable your AI Agent to autonomously plan and research, configure OpusFlow as an MCP Server.
+This monorepo contains:
 
-**Claude Desktop Configuration:**
+### 🔧 [CLI Tool](./cli/)
+A Go-based command-line tool for creating and managing development plans.
 
-*   **Mac**: `~/Library/Application Support/Claude/claude_desktop_config.json`
-*   **Windows**: `%APPDATA%\Claude\claude_desktop_config.json`
+**Features:**
+- Create structured development plans
+- Generate AI-ready prompts
+- Verify implementation against plans
+- MCP (Model Context Protocol) server support
 
-Add the following entry:
-
-```json
-{
-  "mcpServers": {
-    "opusflow": {
-      "command": "opusflow",
-      "args": ["mcp"]
-    }
-  }
-}
-```
-
-*Note: Ensure `opusflow` is available in your global path, or provide the absolute path in `"command"`.*
-
----
-
-## 🛠️ Usage Guide
-
-### 1. The Planning Workflow
-
-OpusFlow structures development into clear steps.
-
-**Step 1: Create a Plan**
-Bootstrap a new task.
+**Quick Commands:**
 ```bash
-opusflow plan "Refactor Login Service"
-# Creates: opusflow-planning/plans/plan-01-refactor-login-service.md
+opusflow plan "Add user authentication"
+opusflow verify plan-20231222.md
+opusflow prompt plan plan-20231222.md
 ```
 
-**Step 2: Research & Fill**
-Ask your Agent (via MCP or Chat) to research the codebase and fill out the plan's "Observations" and "Implementation Steps".
+[→ CLI Documentation](./cli/README.md)
 
-> **Agent Prompt:** "Read plan-01.md. Use your tools to research the codebase and fill in the missing sections."
+---
 
-**Step 3: Execute**
-The Agent writes code following the strict steps defined in the plan.
+### 🎨 [VSCode Extension](./vscode-extension/)
+A TypeScript-based VSCode extension for visual workflow orchestration.
 
-**Step 4: Verify**
-Generate a verification checklist to ensure acceptance criteria are met.
+**Features:**
+- Beautiful workflow dashboard with 4 tabs
+- Real-time progress tracking
+- Multi-agent authentication (Cursor, Gemini, Claude)
+- File system integration with auto-refresh
+- One-click workflow execution
+
+**Screenshots:**
+- Modern dark theme with gradients
+- Real-time log streaming
+- Phase tracking with status badges
+
+[→ Extension Documentation](./vscode-extension/README.md)
+
+---
+
+## 🎯 How It Works
+
+OpusFlow implements a **plan-first development workflow**:
+
+### 1. **Create a Plan**
 ```bash
-opusflow verify plan-01-refactor-login-service.md
+opusflow plan "Implement feature X"
 ```
+Creates a structured plan in `opusflow-planning/plans/`
 
-### 2. Available Workflows
+### 2. **Generate AI Prompts**
+```bash
+opusflow prompt plan plan-20231222.md
+```
+Generates context-rich prompts for your AI agent
 
-OpusFlow provides standardized templates for different scenarios:
+### 3. **Execute with AI**
+Use the generated prompt with your favorite AI agent (Cursor, Claude, Gemini)
 
-| Workflow | Description | Use Case |
-|----------|-------------|----------|
-| **[Plan](workflows/plan.md)** | Standard 5-step implementation plan. | Single Feature / Bug Fix |
-| **[Phases](workflows/phases.md)** | Multi-phase operational breakdown. | Large Epics / Complex Architectures |
-| **[Review](workflows/review.md)** | Quality & Security Audit. | Code Review / Security Hardening |
-| **[Verification](workflows/verification.md)** | QA & Acceptance Testing. | Post-implementation checks |
+### 4. **Verify Implementation**
+```bash
+opusflow verify plan-20231222.md
+```
+Automatically checks if implementation matches the plan
 
-For a step-by-step walkthrough of a real-world task, see **[EXAMPLES.md](EXAMPLES.md)**.
+### 5. **Iterate**
+Review verification results and iterate as needed
 
 ---
 
-## 🏗️ Architecture
+## 📖 Documentation
 
-OpusFlow operates locally on your machine.
-*   **CLI**: Humans use it to manage the lifecycle of plans.
-*   **MCP Server**: Agents use it to `list_files` and `search_codebase` rapidly.
-*   **Repository**: All state is stored in `opusflow-planning/`, keeping your project portable.
-
-For a deep dive, see [ARCHITECTURE.md](ARCHITECTURE.md).
+- **[Architecture](./docs/ARCHITECTURE.md)** - System design and components
+- **[Contributing](./docs/CONTRIBUTING.md)** - How to contribute
+- **[Examples](./docs/EXAMPLES.md)** - Usage examples and workflows
+- **[CLI README](./cli/README.md)** - CLI tool documentation
+- **[Extension README](./vscode-extension/README.md)** - VSCode extension documentation
 
 ---
 
-## 📂 Workspace Structure
+## 🛠️ Development
 
-OpusFlow is flexible and supports both single-repo and multi-repo setups.
-
-### Recommended Setup (Unified Planning)
-For workspaces with multiple services (e.g., `frontend` and `backend`), place the `opusflow-planning` folder at the **root** of your workspace. This allows the Agent to plan and execute across the entire stack simultaneously.
-
-```
-workspace/                  <-- Project Root
-├── .agent/                 <-- Configuration & Workflows
-├── opusflow-planning/      <-- Unified Plans
-├── frontend/               <-- Frontend Service
-└── backend/                <-- Backend Service
+### CLI Development
+```bash
+cd cli
+go build -o opusflow
+./opusflow --help
 ```
 
-### Alternative Setup (Independent Planning)
-If you prefer strict separation, you can initialize OpusFlow inside each repository independently. The Agent will treat them as completely separate projects.
+### Extension Development
+```bash
+cd vscode-extension
+npm install
+npm run compile
+# Press F5 in VSCode to launch Extension Development Host
+```
+
+---
+
+## 🏗️ Project Structure
+
+```
+opusflow/
+├── cli/                      # Go CLI tool
+│   ├── cmd/                  # Command implementations
+│   ├── internal/             # Internal packages
+│   └── main.go               # Entry point
+│
+├── vscode-extension/         # VSCode extension
+│   ├── src/                  # TypeScript source
+│   ├── resources/            # UI resources
+│   └── package.json          # Extension manifest
+│
+├── .agent/                   # Agent workflows
+│   └── workflows/            # Workflow definitions
+│
+├── docs/                     # Documentation
+│   ├── ARCHITECTURE.md
+│   ├── CONTRIBUTING.md
+│   └── EXAMPLES.md
+│
+└── opusflow-planning/        # Example planning directory
+    ├── plans/                # Development plans
+    ├── phases/               # Phase breakdowns
+    └── verifications/        # Verification reports
+```
+
+---
+
+## 🌟 Features
+
+### CLI Features
+- ✅ Plan creation and management
+- ✅ AI prompt generation
+- ✅ Implementation verification
+- ✅ MCP server support
+- ✅ Cross-platform (Linux, macOS, Windows)
+
+### Extension Features
+- ✅ Visual workflow dashboard
+- ✅ Multi-agent authentication
+- ✅ Real-time progress tracking
+- ✅ File system integration
+- ✅ One-click execution
+- ✅ Beautiful dark theme UI
+
+---
+
+## 🔗 Integrations
+
+OpusFlow works with:
+- **Cursor AI** - Native integration
+- **Claude (Anthropic)** - API support
+- **Gemini (Google)** - API support
+- **Any AI agent** - Via generated prompts
+
+---
+
+## 📋 Requirements
+
+### CLI
+- Go 1.21 or higher (for building)
+- No runtime dependencies
+
+### VSCode Extension
+- VSCode 1.107.0 or higher
+- OpusFlow CLI installed
+- Node.js 18+ (for development)
+
+---
+
+## 🚧 Roadmap
+
+- [ ] Direct AI agent execution
+- [ ] Workflow templates
+- [ ] Team collaboration features
+- [ ] Multi-workspace support
+- [ ] Web dashboard
+- [ ] Additional AI agent providers
 
 ---
 
 ## 🤝 Contributing
 
-Contributions are welcome! Please see **[CONTRIBUTING.md](CONTRIBUTING.md)** for development setup and contribution guidelines.
+We welcome contributions! Please see [CONTRIBUTING.md](./docs/CONTRIBUTING.md) for details.
+
+### Development Setup
+1. Clone the repository
+2. Install CLI: `cd cli && go build`
+3. Install extension dependencies: `cd vscode-extension && npm install`
+4. Make changes
+5. Test thoroughly
+6. Submit PR
+
+---
 
 ## 📄 License
 
-MIT License. See [LICENSE](LICENSE) for details.
+MIT © OpusFlow Team
+
+See [LICENSE](LICENSE) for details.
+
+---
+
+## 🙏 Acknowledgments
+
+Built with love for developers who believe in planning before coding.
+
+Special thanks to:
+- The Go community
+- VSCode extension developers
+- AI agent providers (Anthropic, Google, Cursor)
+
+---
+
+## 📞 Support
+
+- **Issues**: [GitHub Issues](https://github.com/tuanpep/opusflow/issues)
+- **Documentation**: [docs/](./docs/)
+- **CLI Help**: `opusflow --help`
+- **Extension Help**: Check the extension README
+
+---
+
+**Start planning, stop guessing. Build better software with OpusFlow.** 🚀

@@ -1,0 +1,20 @@
+# CLI build artifacts
+cli/opusflow
+
+# VSCode Extension
+vscode-extension/dist/
+vscode-extension/out/
+vscode-extension/node_modules/
+vscode-extension/*.vsix
+
+# General
+*.log
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+
+# Planning (user-specific)
+opusflow-planning/

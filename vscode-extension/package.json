@@ -1,0 +1,160 @@
+{
+  "name": "vscode-opusflow",
+  "displayName": "OpusFlow",
+  "description": "VSCode extension for OpusFlow - orchestrate AI agents with plan-first development",
+  "version": "0.1.0",
+  "publisher": "opusflow",
+  "engines": {
+    "vscode": "^1.107.0"
+  },
+  "categories": [
+    "Programming Languages",
+    "Other"
+  ],
+  "keywords": [
+    "opusflow",
+    "ai-agent",
+    "planning",
+    "workflow",
+    "cursor",
+    "claude",
+    "gemini"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/tuanpep/opusflow"
+  },
+  "activationEvents": [
+    "workspaceContains:**/opusflow-planning/**"
+  ],
+  "main": "./dist/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "opusflow.createPlan",
+        "title": "OpusFlow: Create Plan",
+        "icon": "$(new-file)"
+      },
+      {
+        "command": "opusflow.verifyPlan",
+        "title": "OpusFlow: Verify Plan",
+        "icon": "$(check)"
+      },
+      {
+        "command": "opusflow.executeWorkflow",
+        "title": "OpusFlow: Execute Workflow",
+        "icon": "$(play)"
+      },
+      {
+        "command": "opusflow.openWorkflow",
+        "title": "OpusFlow: Open Workflow Panel",
+        "icon": "$(dashboard)"
+      },
+      {
+        "command": "opusflow.selectAgent",
+        "title": "OpusFlow: Select AI Agent"
+      },
+      {
+        "command": "opusflow.authenticateAgent",
+        "title": "OpusFlow: Authenticate Agent"
+      }
+    ],
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "opusflow",
+          "title": "OpusFlow",
+          "icon": "resources/opusflow-icon.svg"
+        }
+      ]
+    },
+    "views": {
+      "opusflow": [
+        {
+          "id": "opusflowExplorer",
+          "name": "Plans & Verifications",
+          "icon": "resources/opusflow-icon.svg"
+        }
+      ]
+    },
+    "configuration": {
+      "title": "OpusFlow",
+      "properties": {
+        "opusflow.cliPath": {
+          "type": "string",
+          "default": "opusflow",
+          "description": "Path to OpusFlow CLI executable"
+        },
+        "opusflow.defaultAgent": {
+          "type": "string",
+          "enum": [
+            "cursor-agent",
+            "gemini-cli",
+            "claude-cli"
+          ],
+          "default": "cursor-agent",
+          "description": "Default AI agent to use"
+        },
+        "opusflow.autoRefresh": {
+          "type": "boolean",
+          "default": true,
+          "description": "Auto-refresh UI when files change"
+        }
+      }
+    },
+    "menus": {
+      "view/item/context": [
+        {
+          "command": "opusflow.createPlan",
+          "when": "view == opusflowExplorer && viewItem == category",
+          "group": "inline"
+        },
+        {
+          "command": "opusflow.verifyPlan",
+          "when": "view == opusflowExplorer && viewItem == file",
+          "group": "inline"
+        },
+        {
+          "command": "opusflow.executeWorkflow",
+          "when": "view == opusflowExplorer && viewItem == file",
+          "group": "navigation"
+        }
+      ]
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run package",
+    "compile": "webpack",
+    "watch": "webpack --watch",
+    "package": "webpack --mode production --devtool hidden-source-map",
+    "compile-tests": "tsc -p . --outDir out",
+    "watch-tests": "tsc -p . -w --outDir out",
+    "pretest": "npm run compile-tests && npm run compile && npm run lint",
+    "lint": "eslint src --ext ts",
+    "test": "node ./out/test/runTest.js",
+    "test:unit": "mocha -r ts-node/register 'src/test/**/*.test.ts'"
+  },
+  "devDependencies": {
+    "@types/chai": "^4.3.20",
+    "@types/mocha": "^10.0.10",
+    "@types/node": "^25.0.3",
+    "@types/sinon": "^17.0.4",
+    "@types/vscode": "^1.107.0",
+    "@typescript-eslint/eslint-plugin": "^8.50.0",
+    "@typescript-eslint/parser": "^8.50.0",
+    "chai": "^4.5.0",
+    "eslint": "^9.39.2",
+    "mocha": "^10.8.2",
+    "sinon": "^17.0.1",
+    "ts-loader": "^9.5.4",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.9.3",
+    "webpack": "^5.104.1",
+    "webpack-cli": "^6.0.1"
+  },
+  "dependencies": {
+    "@types/marked": "^5.0.2",
+    "chokidar": "^5.0.0",
+    "marked": "^17.0.1"
+  }
+}

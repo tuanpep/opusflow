@@ -1,11 +1,17 @@
 # OpusFlow CLI
 
-The official CLI tool for the OpusFlow workflow.
+> Part of the [OpusFlow](../) monorepo - Command-line tool for plan-first development
+
+This is the CLI component of OpusFlow. For the complete toolkit including the VSCode extension, see the [main README](../README.md).
 
 ## Installation
 
 ```bash
-cd opusflow/cli
+# Using install script (recommended)
+curl -fsSL https://raw.githubusercontent.com/tuanpep/opusflow/main/install.sh | bash
+
+# Or build from source
+cd cli
 go install .
 ```
 
