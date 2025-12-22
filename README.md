@@ -1,149 +1,114 @@
 # OpusFlow
 
-> **Spec-Driven Development**: Build with a spec. Orchestrate your coding agents. Ship with confidence.
+> **Spec-Driven Development for the Age of AI Agents**
 
-OpusFlow provides a structured workflow and CLI to guide AI Coding Agents (like Cursor, Windsurf, or Antigravity) through complex development tasks using a **Plan → Execute → Verify** loop.
+OpusFlow is a development orchestration tool designed to bridge the gap between Human Intent and AI Coding Agents (like Claude Desktop, Cursor, or Windsurf). It enforces a **"Plan-First"** philosophy, ensuring complex tasks are executed through a structured **Plan → Execute → Verify** loop rather than ad-hoc chat interactions.
 
-## 📂 Structure
+## 🚀 Why OpusFlow?
 
-```
-opusflow/
-├── cli/                        # The OpusFlow CLI tool
-├── README.md                   # This file
-├── verifications/              # Verification comments output
-│   └── verify-*.md             # Generated verification reports
-└── workflows/
-    ├── plan.md                 # Single-task implementation (5 steps)
-    ├── phases.md               # Multi-phase projects (7 steps)
-    ├── review.md               # Code quality review (3 steps)
-    └── verification.md         # Plan adherence verification
-```
-
-**Output Directory**:
-```
-opusflow-planning/
-├── plans/                      # Detailed implementation plans
-└── verifications/              # Verification reports
-```
+*   **🚫 Stop Hallucinations**: Agents work better when they follow a strict, improved plan.
+*   **⚡ Parallel Research**: Intelligent context gathering that scans your codebase efficiently using parallel execution.
+*   **🔗 MCP Native**: Built from the ground up to work as a Model Context Protocol (MCP) server, integrating seamlessly with Claude Desktop.
+*   **📂 File-System based**: No databases. Your plans live in your repo as Markdown, version-controlled alongside your code.
 
 ---
 
-## 🚀 Quick Start (CLI)
+## 📥 Installation
 
-The easiest way to use OpusFlow is via the CLI.
+### Option 1: One-Line Install (Mac & Linux)
+The fastest way to get started. Installs the binary to `/usr/local/bin`.
 
-### 1. Installation
-
-### 1. Installation
-
-**Option A: One-Line Install (Mac & Linux)**
 ```bash
 curl -sL https://raw.githubusercontent.com/tuanpep/oplusflow/main/install.sh | bash
 ```
 
-**Option B: Download Binary Manually**
-1.  Download the latest release for your OS from the [Releases Page](https://github.com/tuanpep/oplusflow/releases).
-2.  Unzip the file and place the binary in your path.
+### Option 2: Windows / Manual
+Download the latest release for your platform from the [Releases Page](https://github.com/tuanpep/oplusflow/releases) and add it to your PATH.
 
-**Option C: Install from Source**
+### Option 3: Go Install
 ```bash
-cd opusflow/cli
-make build
-# or/
-go install .
+go install github.com/ergonml/opusflow/cli@latest
 ```
 
-### 2. Configure for AI Agents (Claude Desktop)
+---
 
-To let your AI Agent use OpusFlow, add it to your config file:
-- **Mac**: `~/Library/Application Support/Claude/claude_desktop_config.json`
-- **Windows**: `%APPDATA%\Claude\claude_desktop_config.json`
+## 🤖 Configuration (For AI Agents)
+
+To enable your AI Agent to autonomously plan and research, configure OpusFlow as an MCP Server.
+
+**Claude Desktop Configuration:**
+
+*   **Mac**: `~/Library/Application Support/Claude/claude_desktop_config.json`
+*   **Windows**: `%APPDATA%\Claude\claude_desktop_config.json`
+
+Add the following entry:
 
 ```json
 {
   "mcpServers": {
     "opusflow": {
-      "command": "/path/to/opusflow",
+      "command": "opusflow",
       "args": ["mcp"]
     }
   }
 }
 ```
 
-### 3. Workflow
-
-#### Step 1: Create a Plan
-Tell OpusFlow what you want to build.
-
-```bash
-opusflow plan "Login Refactor"
-# Created: opusflow-planning/plans/plan-01-login-refactor.md
-```
-
-#### Step 2: Prompt the Agent
-Get the specific prompt to paste into your AI Agent to fill out the plan.
-
-```bash
-opusflow prompt plan plan-01-login-refactor.md
-# Output: "Read @opusflow-planning/plans/plan-01-login-refactor.md and..."
-```
-
-*(Paste this into Cursor/Antigravity)*
-
-#### Step 3: Execute
-Once the plan is filled, ask the agent to execute it.
-
-```bash
-opusflow prompt execute plan-01-login-refactor.md
-# Output: "Follow the plan in @... verbatim..."
-```
-
-#### Step 4: Verify
-After execution, verify the work.
-
-```bash
-opusflow verify plan-01-login-refactor.md
-# Created: opusflow-planning/verifications/verify-plan-01-...md
-```
-
-Then prompt the agent to perform the verification:
-
-```bash
-opusflow prompt verify plan-01-login-refactor.md
-```
+*Note: Ensure `opusflow` is available in your global path, or provide the absolute path in `"command"`.*
 
 ---
 
-## 🔄 Core Workflows (Manual Usage)
+## 🛠️ Usage Guide
 
-If you prefer not to use the CLI, you can use the markdown files directly.
+### 1. The Planning Workflow
 
-| Workflow | Steps | Use Case | Output |
-|----------|-------|----------|--------|
-| **[Plan](workflows/plan.md)** | 5 | Single feature/bug fix (1 PR) | File-level implementation plan |
-| **[Phases](workflows/phases.md)** | 7 | Complex features (2+ PRs) | Sequenced phase breakdown |
-| **[Review](workflows/review.md)** | 3 | Code quality assessment | Bug/Perf/Security/Clarity comments |
-| **[Verification](workflows/verification.md)** | 4 | After plan implementation | Numbered actionable fix comments |
+OpusFlow structures development into clear steps.
+
+**Step 1: Create a Plan**
+Bootstrap a new task.
+```bash
+opusflow plan "Refactor Login Service"
+# Creates: opusflow-planning/plans/plan-01-refactor-login-service.md
+```
+
+**Step 2: Research & Fill**
+Ask your Agent (via MCP or Chat) to research the codebase and fill out the plan's "Observations" and "Implementation Steps".
+
+> **Agent Prompt:** "Read plan-01.md. Use your tools to research the codebase and fill in the missing sections."
+
+**Step 3: Execute**
+The Agent writes code following the strict steps defined in the plan.
+
+**Step 4: Verify**
+Generate a verification checklist to ensure acceptance criteria are met.
+```bash
+opusflow verify plan-01-refactor-login-service.md
+```
+
+### 2. Available Workflows
+
+OpusFlow provides standardized templates for different scenarios:
+
+| Workflow | Description | Use Case |
+|----------|-------------|----------|
+| **[Plan](workflows/plan.md)** | Standard 5-step implementation plan. | Single Feature / Bug Fix |
+| **[Phases](workflows/phases.md)** | Multi-phase operational breakdown. | Large Epics / Complex Architectures |
+| **[Review](workflows/review.md)** | Quality & Security Audit. | Code Review / Security Hardening |
+| **[Verification](workflows/verification.md)** | QA & Acceptance Testing. | Post-implementation checks |
 
 ---
 
-## 📄 Plan Quality Standards
+## 🏗️ Architecture
 
-Every plan MUST include:
+OpusFlow operates locally on your machine.
+*   **CLI**: Humans use it to manage the lifecycle of plans.
+*   **MCP Server**: Agents use it to `list_files` and `search_codebase` rapidly.
+*   **Repository**: All state is stored in `opusflow-planning/`, keeping your project portable.
 
-| Element | Description |
-|---------|-------------|
-| **Pre-requisites** | Dependencies, prior context, environment |
-| **Observations** | Current state, missing components, architecture |
-| **Approach** | Strategy, key decisions, risks |
-| **Implementation Steps** | File, Action, Purpose, Changes, Symbol References |
-| **Error Handling** | Per-step error cases and handling |
-| **Testing** | Test cases and verification commands |
-| **Success Criteria** | Measurable completion criteria |
+For a deep dive, see [ARCHITECTURE.md](ARCHITECTURE.md).
 
 ---
 
-## 📖 References
+## 📄 License
 
-- [OpusFlow CLI](cli/README.md)
-- [AGENTS.md Standard](https://agents.md)
+MIT License. See [LICENSE](LICENSE) for details.
