@@ -63,7 +63,7 @@ release:
   # GoReleaser will create the release
   github:
     owner: tuanpep
-    name: oplusflow
+    name: opusflow
   draft: false
   prerelease: auto
   name_template: "Release {{.Tag}}"

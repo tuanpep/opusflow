@@ -2,7 +2,7 @@
 set -e
 
 OWNER="tuanpep"
-REPO="oplusflow"
+REPO="opusflow"
 BINARY="opusflow"
 INSTALL_DIR="/usr/local/bin"
 
