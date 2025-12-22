@@ -1,11 +1,12 @@
 import * as vscode from 'vscode';
 import { WorkflowWebview } from './workflowWebview';
+import { FileWatcher } from '../utils/fileWatcher';
 
 export class WebviewProvider {
-    constructor(private readonly extensionUri: vscode.Uri) {}
+    constructor(private readonly extensionUri: vscode.Uri, private readonly watcher: FileWatcher) { }
 
     public showWorkflow() {
-        WorkflowWebview.createOrShow(this.extensionUri);
+        WorkflowWebview.createOrShow(this.extensionUri, this.watcher);
     }
 
     public updatePlanView(_content: string) {

@@ -32,86 +32,14 @@
   "contributes": {
     "commands": [
       {
-        "command": "opusflow.createPlan",
-        "title": "OpusFlow: Create Plan",
-        "icon": "$(new-file)"
-      },
-      {
-        "command": "opusflow.verifyPlan",
-        "title": "OpusFlow: Verify Plan",
-        "icon": "$(check)"
-      },
-      {
-        "command": "opusflow.executeWorkflow",
-        "title": "OpusFlow: Execute Workflow",
-        "icon": "$(play)"
-      },
-      {
         "command": "opusflow.openWorkflow",
-        "title": "OpusFlow: Open Workflow Panel",
+        "title": "OpusFlow: Open Dashboard",
         "icon": "$(dashboard)"
       },
       {
-        "command": "opusflow.selectAgent",
-        "title": "OpusFlow: Select AI Agent"
-      },
-      {
-        "command": "opusflow.authenticateAgent",
-        "title": "OpusFlow: Authenticate Agent"
-      },
-      {
-        "command": "opusflow.copyVerificationPrompt",
-        "title": "OpusFlow: Copy Verification Prompt"
-      },
-      {
-        "command": "opusflow.generateMap",
-        "title": "OpusFlow: Generate Codebase Map",
-        "icon": "$(symbol-structure)"
-      },
-      {
-        "command": "opusflow.createSpec",
-        "title": "OpusFlow: Create Specification",
-        "icon": "$(file-text)"
-      },
-      {
-        "command": "opusflow.decomposePlan",
-        "title": "OpusFlow: Decompose Plan into Tasks",
-        "icon": "$(list-tree)"
-      },
-      {
-        "command": "opusflow.nextTask",
-        "title": "OpusFlow: Get Next Task",
-        "icon": "$(arrow-right)"
-      },
-      {
-        "command": "opusflow.completeTask",
-        "title": "OpusFlow: Mark Task Complete",
-        "icon": "$(check-all)"
-      },
-      {
-        "command": "opusflow.execTask",
-        "title": "OpusFlow: Execute Task with Agent",
-        "icon": "$(run)"
-      },
-      {
-        "command": "opusflow.workflowStatus",
-        "title": "OpusFlow: Show Workflow Status",
-        "icon": "$(info)"
-      },
-      {
-        "command": "opusflow.workflowStart",
-        "title": "OpusFlow: Start New Workflow",
-        "icon": "$(rocket)"
-      },
-      {
-        "command": "opusflow.workflowNext",
-        "title": "OpusFlow: Next Step Guidance",
-        "icon": "$(lightbulb)"
-      },
-      {
-        "command": "opusflow.setupApiKeys",
-        "title": "OpusFlow: Setup API Keys",
-        "icon": "$(key)"
+        "command": "opusflow.refreshExplorer",
+        "title": "OpusFlow: Refresh Status",
+        "icon": "$(refresh)"
       }
     ],
     "viewsContainers": {
@@ -126,20 +54,8 @@
     "views": {
       "opusflow": [
         {
-          "type": "webview",
-          "id": "opusflowChat",
-          "name": "Workflow Hub",
-          "icon": "$(comment-discussion)"
-        },
-        {
-          "type": "webview",
-          "id": "opusflowAuth",
-          "name": "Agent Status",
-          "icon": "$(lock)"
-        },
-        {
           "id": "opusflowExplorer",
-          "name": "Specs, Plans & Tasks",
+          "name": "Project Status",
           "icon": "resources/opusflow-icon.svg"
         }
       ]
@@ -174,46 +90,11 @@
       }
     },
     "menus": {
-      "view/item/context": [
+      "view/title": [
         {
-          "command": "opusflow.createPlan",
-          "when": "view == opusflowExplorer && viewItem == category",
-          "group": "inline"
-        },
-        {
-          "command": "opusflow.createSpec",
-          "when": "view == opusflowExplorer && viewItem == category",
-          "group": "inline"
-        },
-        {
-          "command": "opusflow.verifyPlan",
-          "when": "view == opusflowExplorer && viewItem == plan",
-          "group": "inline"
-        },
-        {
-          "command": "opusflow.decomposePlan",
-          "when": "view == opusflowExplorer && viewItem == plan",
-          "group": "inline"
-        },
-        {
-          "command": "opusflow.executeWorkflow",
-          "when": "view == opusflowExplorer && viewItem == plan",
+          "command": "opusflow.refreshExplorer",
+          "when": "view == opusflowExplorer",
           "group": "navigation"
-        },
-        {
-          "command": "opusflow.copyVerificationPrompt",
-          "when": "view == opusflowExplorer && viewItem == plan",
-          "group": "inline"
-        },
-        {
-          "command": "opusflow.nextTask",
-          "when": "view == opusflowExplorer && viewItem == taskQueue",
-          "group": "inline"
-        },
-        {
-          "command": "opusflow.completeTask",
-          "when": "view == opusflowExplorer && viewItem == task",
-          "group": "inline"
         }
       ]
     }
