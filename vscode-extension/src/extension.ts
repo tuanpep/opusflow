@@ -3,7 +3,7 @@ import * as path from 'path';
 import * as fs from 'fs';
 import { AuthManager } from './auth/authManager';
 import { AuthWebview } from './ui/authWebview';
-import { AuthSidebarProvider } from './ui/authSidebar';
+import { ChatSidebarProvider } from './ui/chatSidebar'; // New Provider
 import { AuthProviderType } from './auth/types';
 import { FileWatcher } from './utils/fileWatcher';
 import { OpusFlowExplorerProvider } from './ui/opusflowExplorer';
@@ -63,14 +63,14 @@ export function activate(context: vscode.ExtensionContext) {
     const explorerProvider = new OpusFlowExplorerProvider(fileWatcher);
     vscode.window.registerTreeDataProvider('opusflowExplorer', explorerProvider);
 
-    // Initialize Auth Sidebar
-    const authSidebarProvider = new AuthSidebarProvider(context.extensionUri, authManager);
+    // Initialize Chat Sidebar (Replaces Auth Sidebar)
+    const chatSidebarProvider = new ChatSidebarProvider(context.extensionUri, authManager, cli);
     context.subscriptions.push(
-        vscode.window.registerWebviewViewProvider(AuthSidebarProvider.viewType, authSidebarProvider)
+        vscode.window.registerWebviewViewProvider(ChatSidebarProvider.viewType, chatSidebarProvider)
     );
 
     // Register commands
-    registerCommands(context, extensionContext);
+    registerCommands(context, extensionContext, explorerProvider);
 
     // Show status bar
     statusBarItem.show();
@@ -98,7 +98,8 @@ function createStatusBarItem(): vscode.StatusBarItem {
 
 function registerCommands(
     context: vscode.ExtensionContext,
-    extensionContext: OpusFlowExtensionContext
+    extensionContext: OpusFlowExtensionContext,
+    explorerProvider: OpusFlowExplorerProvider
 ) {
     const planHandlers = new PlanCommands(extensionContext.cli);
     const verifyHandlers = new VerifyCommands(extensionContext.cli);
@@ -143,6 +144,12 @@ function registerCommands(
         }
     );
 
+    // Refresh Explorer command
+    const refreshExplorerCmd = vscode.commands.registerCommand(
+        'opusflow.refreshExplorer',
+        () => explorerProvider.refresh()
+    );
+
     // Select Agent command
     const selectAgentCmd = vscode.commands.registerCommand(
         'opusflow.selectAgent',
@@ -169,7 +176,7 @@ function registerCommands(
         }
     );
 
-    // Authenticate Agent command
+    // Authenticate Agent command (still accessible via command palette/logic, though removed from sidebar view)
     const authenticateAgentCmd = vscode.commands.registerCommand(
         'opusflow.authenticateAgent',
         () => {
@@ -199,6 +206,7 @@ function registerCommands(
         verifyPlanCmd,
         executeWorkflowCmd,
         openWorkflowCmd,
+        refreshExplorerCmd,
         selectAgentCmd,
         authenticateAgentCmd,
         copyVerificationPromptCmd

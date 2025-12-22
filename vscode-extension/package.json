@@ -2,7 +2,7 @@
   "name": "vscode-opusflow",
   "displayName": "OpusFlow",
   "description": "VSCode extension for OpusFlow - orchestrate AI agents with plan-first development",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "publisher": "opusflow",
   "engines": {
     "vscode": "^1.104.0"
@@ -76,9 +76,9 @@
       "opusflow": [
         {
           "type": "webview",
-          "id": "opusflowAuth",
-          "name": "AI Agents",
-          "icon": "$(account)"
+          "id": "opusflowChat",
+          "name": "Chat",
+          "icon": "$(comment-discussion)"
         },
         {
           "id": "opusflowExplorer",
