@@ -130,7 +130,7 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
         let contextMsg = "";
 
         // A. Parse @Mentions
-        const mentionRegex = /@([a-zA-Z0-9_\-\.\/]+)/g;
+        const mentionRegex = /@([\w./-]+)/g;
         const matches = [...userMessage.matchAll(mentionRegex)];
 
         if (matches.length > 0) {
@@ -211,21 +211,47 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
         const sidebarHtmlPath = vscode.Uri.joinPath(this._extensionUri, "media", "sidebar.html");
         const sidebarJsPath = vscode.Uri.joinPath(this._extensionUri, "media", "sidebar.js");
 
-        // CSS Paths (if you had separate CSS files, but here mostly inline or in sidebar.html)
-        // Assuming we might break out CSS later, but existing sidebar.html has inline CSS.
+        // vscode-elements module path
+        const vsceElementsPath = vscode.Uri.joinPath(
+            this._extensionUri,
+            "node_modules",
+            "@vscode-elements",
+            "elements",
+            "dist",
+            "bundled.js"
+        );
 
         // Load HTML content
         let htmlContent = fs.readFileSync(sidebarHtmlPath.fsPath, "utf-8");
 
         const scriptUri = webview.asWebviewUri(sidebarJsPath);
+        const vsceElementsUri = webview.asWebviewUri(vsceElementsPath);
+        const nonce = this._getNonce();
 
-        // Inject script URI
+        // Inject vscode-elements script URI
+        htmlContent = htmlContent.replace(
+            `<script type="module">
+        import '@vscode-elements/elements';
+    </script>`,
+            `<script type="module" src="${vsceElementsUri}" nonce="${nonce}"></script>`
+        );
+
+        // Inject sidebar.js script URI
         htmlContent = htmlContent.replace(
             '<script src="sidebar.js"></script>',
-            `<script src="${scriptUri}"></script>`
+            `<script src="${scriptUri}" nonce="${nonce}"></script>`
         );
 
         return htmlContent;
+    }
+
+    private _getNonce(): string {
+        let text = '';
+        const possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+        for (let i = 0; i < 32; i++) {
+            text += possible.charAt(Math.floor(Math.random() * possible.length));
+        }
+        return text;
     }
 
     private async _savePlan(planData: any) {

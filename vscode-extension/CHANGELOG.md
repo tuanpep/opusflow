@@ -4,6 +4,31 @@ All notable changes to the OpusFlow VSCode extension will be documented in this 
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+## [0.5.0] - 2025-12-22
+
+### Added - SDD Workflow Integration
+- **9 New Commands** for Spec-Driven Development:
+  - `opusflow.generateMap` - Generate codebase symbol map
+  - `opusflow.createSpec` - Create feature specification
+  - `opusflow.decomposePlan` - Break plan into atomic tasks
+  - `opusflow.nextTask` - Get next pending task
+  - `opusflow.completeTask` - Mark task as complete
+  - `opusflow.execTask` - Execute task with AI agent
+  - `opusflow.workflowStatus` - Show workflow status
+  - `opusflow.workflowStart` - Start new workflow
+  - `opusflow.workflowNext` - Get next step guidance
+
+### Changed - UI Refactor
+- **Modern UI** using `@vscode-elements/elements` library
+- **Native VSCode theming** with `--vscode-*` CSS variables
+- **Phase Stepper** showing 5-step SDD workflow progress
+- **Tree View** now shows Specifications and Task Queues
+
+### Improved - CLI Wrapper
+- 14 new methods in `OpusFlowWrapper` for SDD commands
+- 9 new result interfaces in `OutputParser`
+- Enhanced workflow status bar with phase icons
+
 
 ## [0.1.0] - 2025-12-22
 

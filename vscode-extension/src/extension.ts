@@ -1,17 +1,17 @@
 import * as vscode from 'vscode';
 import * as path from 'path';
-import * as fs from 'fs';
 import { AuthManager } from './auth/authManager';
-import { SidebarProvider } from './SidebarProvider'; // New Planning Sidebar
-import { AuthProviderType } from './auth/types';
+import { SidebarProvider } from './SidebarProvider';
 import { FileWatcher } from './utils/fileWatcher';
 import { OpusFlowExplorerProvider } from './ui/opusflowExplorer';
 import { OpusFlowWrapper } from './cli/opusflowWrapper';
 import { WebviewProvider } from './ui/webviewProvider';
-import { WorkflowWebview } from './ui/workflowWebview';
 import { PlanCommands } from './commands/planCommands';
 import { VerifyCommands } from './commands/verifyCommands';
 import { AgentCommands } from './commands/agentCommands';
+import { SpecCommands } from './commands/specCommands';
+import { TaskCommands } from './commands/taskCommands';
+import { WorkflowCommands } from './commands/workflowCommands';
 
 interface OpusFlowExtensionContext {
     statusBarItem: vscode.StatusBarItem;
@@ -64,7 +64,7 @@ export function activate(context: vscode.ExtensionContext) {
     const explorerProvider = new OpusFlowExplorerProvider(fileWatcher);
     vscode.window.registerTreeDataProvider('opusflowExplorer', explorerProvider);
 
-    // Initialize Chat Sidebar (Replaces Auth Sidebar)
+    // Initialize Sidebar
     const sidebarProvider = new SidebarProvider(context.extensionUri, authManager);
     context.subscriptions.push(
         vscode.window.registerWebviewViewProvider(SidebarProvider.viewType, sidebarProvider)
@@ -91,8 +91,8 @@ function createStatusBarItem(): vscode.StatusBarItem {
     );
 
     statusBarItem.text = '$(rocket) OpusFlow';
-    statusBarItem.tooltip = 'OpusFlow: Plan-First Development';
-    statusBarItem.command = 'opusflow.openWorkflow';
+    statusBarItem.tooltip = 'OpusFlow: Spec-Driven Development';
+    statusBarItem.command = 'opusflow.workflowStatus';
 
     return statusBarItem;
 }
@@ -102,9 +102,15 @@ function registerCommands(
     extensionContext: OpusFlowExtensionContext,
     explorerProvider: OpusFlowExplorerProvider
 ) {
+    // Initialize command handlers
     const planHandlers = new PlanCommands(extensionContext.cli);
     const verifyHandlers = new VerifyCommands(extensionContext.cli);
     const agentHandlers = new AgentCommands(extensionContext.cli, extensionContext.authManager);
+    const specHandlers = new SpecCommands(extensionContext.cli);
+    const taskHandlers = new TaskCommands(extensionContext.cli);
+    const workflowHandlers = new WorkflowCommands(extensionContext.cli);
+
+    // ============ Original Commands ============
 
     // Create Plan command
     const createPlanCmd = vscode.commands.registerCommand(
@@ -158,9 +164,9 @@ function registerCommands(
             const authStatuses = await extensionContext.authManager.checkSessions();
 
             const agents = [
-                { label: 'cursor-agent', description: authStatuses.get(AuthProviderType.Cursor) ? '$(check) Authenticated' : '$(x) Not Authenticated' },
-                { label: 'gemini-cli', description: authStatuses.get(AuthProviderType.Gemini) ? '$(check) Authenticated' : '$(x) Not Authenticated' },
-                { label: 'claude-cli', description: authStatuses.get(AuthProviderType.Claude) ? '$(check) Authenticated' : '$(x) Not Authenticated' }
+                { label: 'aider', description: 'AI pair programming tool' },
+                { label: 'claude-code', description: 'Claude Code CLI' },
+                { label: 'prompt', description: 'Generate prompt only' }
             ];
 
             const selected = await vscode.window.showQuickPick(agents, {
@@ -177,7 +183,7 @@ function registerCommands(
         }
     );
 
-    // Authenticate Agent command (Refocuses to Sidebar)
+    // Authenticate Agent command
     const authenticateAgentCmd = vscode.commands.registerCommand(
         'opusflow.authenticateAgent',
         () => {
@@ -191,7 +197,6 @@ function registerCommands(
         async (item: any) => {
             if (!item || !item.label) return;
             try {
-                // Assuming item.label is the plan filename
                 const prompt = await extensionContext.cli.prompt('verify', item.label);
                 await vscode.env.clipboard.writeText(prompt);
                 vscode.window.showInformationMessage('📋 Verification prompt copied to clipboard!');
@@ -201,8 +206,65 @@ function registerCommands(
         }
     );
 
+    // ============ New SDD Commands ============
+
+    // Generate Codebase Map
+    const generateMapCmd = vscode.commands.registerCommand(
+        'opusflow.generateMap',
+        () => specHandlers.generateMap()
+    );
+
+    // Create Specification
+    const createSpecCmd = vscode.commands.registerCommand(
+        'opusflow.createSpec',
+        () => specHandlers.createSpec(context)
+    );
+
+    // Decompose Plan
+    const decomposePlanCmd = vscode.commands.registerCommand(
+        'opusflow.decomposePlan',
+        (item?: any) => taskHandlers.decomposePlan(item)
+    );
+
+    // Get Next Task
+    const nextTaskCmd = vscode.commands.registerCommand(
+        'opusflow.nextTask',
+        (item?: any) => taskHandlers.nextTask(item)
+    );
+
+    // Complete Task
+    const completeTaskCmd = vscode.commands.registerCommand(
+        'opusflow.completeTask',
+        (item?: any) => taskHandlers.completeTask(item)
+    );
+
+    // Execute Task
+    const execTaskCmd = vscode.commands.registerCommand(
+        'opusflow.execTask',
+        (item?: any) => taskHandlers.execTask(item)
+    );
+
+    // Workflow Status
+    const workflowStatusCmd = vscode.commands.registerCommand(
+        'opusflow.workflowStatus',
+        () => workflowHandlers.showStatus()
+    );
+
+    // Workflow Start
+    const workflowStartCmd = vscode.commands.registerCommand(
+        'opusflow.workflowStart',
+        () => workflowHandlers.startWorkflow()
+    );
+
+    // Workflow Next
+    const workflowNextCmd = vscode.commands.registerCommand(
+        'opusflow.workflowNext',
+        () => workflowHandlers.showNextGuidance()
+    );
+
     // Add all commands to subscriptions for cleanup
     context.subscriptions.push(
+        // Original commands
         createPlanCmd,
         verifyPlanCmd,
         executeWorkflowCmd,
@@ -210,6 +272,16 @@ function registerCommands(
         refreshExplorerCmd,
         selectAgentCmd,
         authenticateAgentCmd,
-        copyVerificationPromptCmd
+        copyVerificationPromptCmd,
+        // New SDD commands
+        generateMapCmd,
+        createSpecCmd,
+        decomposePlanCmd,
+        nextTaskCmd,
+        completeTaskCmd,
+        execTaskCmd,
+        workflowStatusCmd,
+        workflowStartCmd,
+        workflowNextCmd
     );
 }

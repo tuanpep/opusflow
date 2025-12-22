@@ -30,7 +30,7 @@ export class FileWatcher implements vscode.Disposable {
         }
 
         this.watcher = chokidar.watch(planningDir, {
-            ignored: /(^|[\/\\])\../, // ignore dotfiles
+            ignored: /(^|[/\\])\../, // ignore dotfiles
             persistent: true,
             ignoreInitial: false
         });

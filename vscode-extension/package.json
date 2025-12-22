@@ -1,8 +1,8 @@
 {
   "name": "vscode-opusflow",
   "displayName": "OpusFlow",
-  "description": "VSCode extension for OpusFlow - orchestrate AI agents with plan-first development",
-  "version": "0.3.0",
+  "description": "VSCode extension for OpusFlow - Spec-Driven Development with AI agents",
+  "version": "0.5.0",
   "publisher": "opusflow",
   "engines": {
     "vscode": "^1.104.0"
@@ -16,9 +16,11 @@
     "ai-agent",
     "planning",
     "workflow",
+    "sdd",
+    "spec-driven",
     "cursor",
     "claude",
-    "gemini"
+    "aider"
   ],
   "repository": {
     "type": "git",
@@ -61,6 +63,51 @@
       {
         "command": "opusflow.copyVerificationPrompt",
         "title": "OpusFlow: Copy Verification Prompt"
+      },
+      {
+        "command": "opusflow.generateMap",
+        "title": "OpusFlow: Generate Codebase Map",
+        "icon": "$(symbol-structure)"
+      },
+      {
+        "command": "opusflow.createSpec",
+        "title": "OpusFlow: Create Specification",
+        "icon": "$(file-text)"
+      },
+      {
+        "command": "opusflow.decomposePlan",
+        "title": "OpusFlow: Decompose Plan into Tasks",
+        "icon": "$(list-tree)"
+      },
+      {
+        "command": "opusflow.nextTask",
+        "title": "OpusFlow: Get Next Task",
+        "icon": "$(arrow-right)"
+      },
+      {
+        "command": "opusflow.completeTask",
+        "title": "OpusFlow: Mark Task Complete",
+        "icon": "$(check-all)"
+      },
+      {
+        "command": "opusflow.execTask",
+        "title": "OpusFlow: Execute Task with Agent",
+        "icon": "$(run)"
+      },
+      {
+        "command": "opusflow.workflowStatus",
+        "title": "OpusFlow: Show Workflow Status",
+        "icon": "$(info)"
+      },
+      {
+        "command": "opusflow.workflowStart",
+        "title": "OpusFlow: Start New Workflow",
+        "icon": "$(rocket)"
+      },
+      {
+        "command": "opusflow.workflowNext",
+        "title": "OpusFlow: Next Step Guidance",
+        "icon": "$(lightbulb)"
       }
     ],
     "viewsContainers": {
@@ -77,12 +124,12 @@
         {
           "type": "webview",
           "id": "opusflowChat",
-          "name": "Chat",
+          "name": "Workflow Hub",
           "icon": "$(comment-discussion)"
         },
         {
           "id": "opusflowExplorer",
-          "name": "Plans & Verifications",
+          "name": "Specs, Plans & Tasks",
           "icon": "resources/opusflow-icon.svg"
         }
       ]
@@ -98,12 +145,12 @@
         "opusflow.defaultAgent": {
           "type": "string",
           "enum": [
-            "cursor-agent",
-            "gemini-cli",
-            "claude-cli"
+            "aider",
+            "claude-code",
+            "prompt"
           ],
-          "default": "cursor-agent",
-          "description": "Default AI agent to use"
+          "default": "prompt",
+          "description": "Default AI agent for task execution"
         },
         "opusflow.autoRefresh": {
           "type": "boolean",
@@ -120,7 +167,17 @@
           "group": "inline"
         },
         {
+          "command": "opusflow.createSpec",
+          "when": "view == opusflowExplorer && viewItem == category",
+          "group": "inline"
+        },
+        {
           "command": "opusflow.verifyPlan",
+          "when": "view == opusflowExplorer && viewItem == plan",
+          "group": "inline"
+        },
+        {
+          "command": "opusflow.decomposePlan",
           "when": "view == opusflowExplorer && viewItem == plan",
           "group": "inline"
         },
@@ -132,6 +189,16 @@
         {
           "command": "opusflow.copyVerificationPrompt",
           "when": "view == opusflowExplorer && viewItem == plan",
+          "group": "inline"
+        },
+        {
+          "command": "opusflow.nextTask",
+          "when": "view == opusflowExplorer && viewItem == taskQueue",
+          "group": "inline"
+        },
+        {
+          "command": "opusflow.completeTask",
+          "when": "view == opusflowExplorer && viewItem == task",
           "group": "inline"
         }
       ]
@@ -150,6 +217,7 @@
     "test:unit": "mocha -r ts-node/register 'src/test/**/*.test.ts'"
   },
   "devDependencies": {
+    "@eslint/js": "^9.39.2",
     "@types/chai": "^4.3.20",
     "@types/mocha": "^10.0.10",
     "@types/node": "^25.0.3",
@@ -169,6 +237,7 @@
   },
   "dependencies": {
     "@types/marked": "^5.0.2",
+    "@vscode-elements/elements": "^2.3.1",
     "chokidar": "^5.0.0",
     "marked": "^17.0.1"
   }
