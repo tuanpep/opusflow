@@ -9,6 +9,8 @@ builds:
     binary: opusflow
     env:
       - CGO_ENABLED=0
+    ldflags:
+      - -s -w -X github.com/ergonml/opusflow/cmd.Version={{.Version}}
     goos:
       - linux
       - windows

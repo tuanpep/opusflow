@@ -6,11 +6,13 @@ import (
 	"github.com/spf13/cobra"
 )
 
+var Version = "dev"
+
 var rootCmd = &cobra.Command{
 	Use:     "opusflow",
 	Short:   "OpusFlow Workflow CLI",
 	Long:    `OpusFlow: A spec-driven development tool to orchestrate coding agents.`,
-	Version: "1.1.1",
+	Version: Version,
 }
 
 func Execute() {
