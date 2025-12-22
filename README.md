@@ -15,20 +15,47 @@ OpusFlow is a development orchestration tool designed to bridge the gap between 
 
 ## 📥 Installation
 
-### Option 1: One-Line Install (Mac & Linux)
+> ⚠️ **Important**: Choose **ONE** installation method. Using multiple methods may cause version conflicts.
+
+### Option 1: One-Line Install (Recommended for Mac & Linux)
 The fastest way to get started. Installs the binary to `/usr/local/bin`.
 
 ```bash
 curl -sL "https://raw.githubusercontent.com/tuanpep/oplusflow/main/install.sh?v=$(date +%s)" | bash
 ```
 
-### Option 2: Windows / Manual
-Download the latest release for your platform from the [Releases Page](https://github.com/tuanpep/oplusflow/releases) and add it to your PATH.
+### Option 2: Go Install (For Go developers)
+Installs to `~/go/bin` (or `$GOPATH/bin`).
 
-### Option 3: Go Install
 ```bash
 go install github.com/tuanpep/oplusflow/cli@latest
 ```
+
+### Option 3: Windows / Manual
+Download the latest release for your platform from the [Releases Page](https://github.com/tuanpep/oplusflow/releases) and add it to your PATH.
+
+### Verify Installation
+
+```bash
+opusflow --version
+# Should show: opusflow version X.Y.Z
+```
+
+### Troubleshooting: Version Mismatch
+
+If `opusflow --version` shows an old version after upgrading:
+
+```bash
+# Check for multiple binaries
+type -a opusflow   # or: which -a opusflow
+
+# If you see multiple paths, remove the old one:
+rm ~/go/bin/opusflow        # If installed via go install
+# or
+sudo rm /usr/local/bin/opusflow  # If installed via install.sh
+```
+
+Then reinstall using your preferred method.
 
 ---
 
