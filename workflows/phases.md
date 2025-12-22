@@ -45,6 +45,8 @@ Break the work into sequential phases:
 - **Scope definition**: Well-defined boundaries for each phase
 
 **Output Format:**
+You MUST save the output to a new file: `/home/tuanbt/ErgonML-PaaS/opusflow-planning/phases/phase-[00]-[name].md`.
+
 ```markdown
 ## Phase 1: [Title]
 

@@ -1,0 +1,11 @@
+# Binaries
+opusflow
+traycer
+bin/
+
+# OS specific
+.DS_Store
+
+# Go
+vendor/
+go.work
