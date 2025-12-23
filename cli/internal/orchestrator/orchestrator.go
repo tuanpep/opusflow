@@ -149,7 +149,7 @@ func (ws *WorkflowState) Save() error {
 	}
 
 	filePath := filepath.Join(stateDir, "workflow-state.json")
-	if err := os.WriteFile(filePath, data, 0644); err != nil {
+	if err := os.WriteFile(filePath, data, 0600); err != nil {
 		return fmt.Errorf("failed to write state: %w", err)
 	}
 
@@ -235,6 +235,9 @@ Suggested next phase: **%s**
 	)
 }
 
+// nvl returns def if s is empty, otherwise returns s.
+// The def parameter is always "(none)" in current usage but kept for flexibility.
+//nolint:unparam // def parameter kept for API flexibility
 func nvl(s, def string) string {
 	if s == "" {
 		return def

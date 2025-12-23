@@ -78,16 +78,16 @@ func initProjectRoot(rootDir string) (string, error) {
 }
 
 // GetPlanningDirs returns paths to plans and verifications dirs, creating them if needed
-func GetPlanningDirs(rootDir string) (string, string, error) {
-	plansDir := filepath.Join(rootDir, "opusflow-planning", "plans")
-	verifyDir := filepath.Join(rootDir, "opusflow-planning", "verifications")
+func GetPlanningDirs(rootDir string) (plansDir, verifyDir string, err error) {
+	plansDir = filepath.Join(rootDir, "opusflow-planning", "plans")
+	verifyDir = filepath.Join(rootDir, "opusflow-planning", "verifications")
 
-	if err := os.MkdirAll(plansDir, 0755); err != nil {
-		return "", "", err
+	if err = os.MkdirAll(plansDir, 0755); err != nil {
+		return
 	}
-	if err := os.MkdirAll(verifyDir, 0755); err != nil {
-		return "", "", err
+	if err = os.MkdirAll(verifyDir, 0755); err != nil {
+		return
 	}
 
-	return plansDir, verifyDir, nil
+	return
 }
