@@ -28,6 +28,7 @@ Download the latest binary from [GitHub Releases](https://github.com/tuanpep/opu
 git clone https://github.com/tuanpep/opusflow.git
 cd opusflow/cli
 make build
+# Binary created at bin/opusflow
 ```
 
 ## Quick Start
