@@ -237,6 +237,7 @@ Suggested next phase: **%s**
 
 // nvl returns def if s is empty, otherwise returns s.
 // The def parameter is always "(none)" in current usage but kept for flexibility.
+//
 //nolint:unparam // def parameter kept for API flexibility
 func nvl(s, def string) string {
 	if s == "" {

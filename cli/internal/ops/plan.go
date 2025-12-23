@@ -22,7 +22,10 @@ type CreatePlanResult struct {
 func CreatePlan(rawTitle string, goal string) (*CreatePlanResult, error) {
 	title := strings.Join(strings.Fields(rawTitle), "-")
 	// Sanitize title
-	reg, _ := regexp.Compile("[^a-zA-Z0-9-]+")
+	reg, err := regexp.Compile("[^a-zA-Z0-9-]+")
+	if err != nil {
+		return nil, fmt.Errorf("failed to compile regex: %w", err)
+	}
 	title = reg.ReplaceAllString(title, "")
 	title = strings.ToLower(title)
 
@@ -94,7 +97,10 @@ func getNextPlanIndex(dir string) int {
 		}
 		matches := re.FindStringSubmatch(f.Name())
 		if len(matches) > 1 {
-			idx, _ := strconv.Atoi(matches[1])
+			idx, err := strconv.Atoi(matches[1])
+			if err != nil {
+				continue // Skip files with invalid numbers
+			}
 			if idx > maxIdx {
 				maxIdx = idx
 			}

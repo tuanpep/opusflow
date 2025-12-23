@@ -91,7 +91,10 @@ var tasksNextCmd = &cobra.Command{
 		}
 
 		// Read plan content for prompt generation
-		planContent, _ := ops.ReadFile(tq.PlanPath)
+		planContent, err := ops.ReadFile(tq.PlanPath)
+		if err != nil {
+			return fmt.Errorf("failed to read plan file: %w", err)
+		}
 		prompt := ops.GenerateTaskPrompt(task, planContent)
 
 		generatePrompt, _ := cmd.Flags().GetBool("prompt")
