@@ -8,8 +8,19 @@ A spec-driven development tool to orchestrate coding agents.
 
 ## Installation
 
+### Option 1: Go Install
 ```bash
-curl -fsSL https://raw.githubusercontent.com/tuanpep/opusflow/main/install.sh | bash
+go install github.com/tuanpep/oplusflow@latest
+```
+
+### Option 2: Download from Releases
+Download the latest binary from [GitHub Releases](https://github.com/tuanpep/opusflow/releases/latest).
+
+### Option 3: Build from Source
+```bash
+git clone https://github.com/tuanpep/opusflow.git
+cd opusflow/cli
+make build
 ```
 
 ## Usage
