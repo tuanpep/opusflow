@@ -41,15 +41,15 @@ esac
 
 info "Detected: $OS_TYPE/$ARCH_TYPE"
 
-# Fetch latest release
-API_URL="https://api.github.com/repos/$OWNER/$REPO/releases/latest"
-info "Fetching latest release..."
+# Fetch latest CLI release (filter out vscode releases)
+API_URL="https://api.github.com/repos/$OWNER/$REPO/releases"
+info "Fetching latest CLI release..."
 
-RELEASE_JSON=$(curl -fsSL "$API_URL" 2>/dev/null) || error "Failed to fetch release info. Check your internet connection."
+RELEASES_JSON=$(curl -fsSL "$API_URL" 2>/dev/null) || error "Failed to fetch release info. Check your internet connection."
 
-# Extract version
-VERSION=$(echo "$RELEASE_JSON" | grep '"tag_name":' | sed -E 's/.*"tag_name":\s*"([^"]+)".*/\1/' | head -1)
-[ -z "$VERSION" ] && error "Could not determine latest version"
+# Find first release that starts with 'v' but not 'vscode-'
+VERSION=$(echo "$RELEASES_JSON" | grep -oP '"tag_name":\s*"\Kv[0-9]+\.[0-9]+\.[0-9]+"' | tr -d '"' | head -1)
+[ -z "$VERSION" ] && error "Could not find a CLI release. Check https://github.com/$OWNER/$REPO/releases"
 
 info "Latest version: $VERSION"
 
