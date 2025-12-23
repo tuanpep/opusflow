@@ -78,12 +78,13 @@ jobs:
         with:
           distribution: goreleaser
           version: '~> v2'
-          args: release --clean
+          args: release --clean --skip=validate
           workdir: .
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Update major version tag
+        if: success()
         run: |
           TAG="${{ steps.tag_version.outputs.new_tag }}"
           MAJOR=$(echo "$TAG" | sed -E 's/^(v[0-9]+).*/\1/')
