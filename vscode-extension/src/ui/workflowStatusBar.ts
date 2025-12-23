@@ -28,7 +28,9 @@ export class WorkflowStatusBar {
 
     private setupWatcher(): void {
         const workspaceFolder = vscode.workspace.workspaceFolders?.[0];
-        if (!workspaceFolder) return;
+        if (!workspaceFolder) {
+            return;
+        }
 
         const pattern = new vscode.RelativePattern(workspaceFolder, '.opusflow/workflow-state.json');
 
@@ -56,7 +58,9 @@ export class WorkflowStatusBar {
 
     private readWorkflowState(): WorkflowState | null {
         const workspaceFolder = vscode.workspace.workspaceFolders?.[0];
-        if (!workspaceFolder) return null;
+        if (!workspaceFolder) {
+            return null;
+        }
 
         const statePath = path.join(workspaceFolder.uri.fsPath, '.opusflow', 'workflow-state.json');
 
@@ -105,8 +109,12 @@ export class WorkflowStatusBar {
         // Artifacts
         if (state.specPath || state.planPath) {
             tooltip.appendMarkdown('---\n');
-            if (state.specPath) tooltip.appendMarkdown(`📝 Spec: ${path.basename(state.specPath)}\n\n`);
-            if (state.planPath) tooltip.appendMarkdown(`📋 Plan: ${path.basename(state.planPath)}\n\n`);
+            if (state.specPath) {
+                tooltip.appendMarkdown(`📝 Spec: ${path.basename(state.specPath)}\n\n`);
+            }
+            if (state.planPath) {
+                tooltip.appendMarkdown(`📋 Plan: ${path.basename(state.planPath)}\n\n`);
+            }
         }
 
         tooltip.appendMarkdown('---\n');

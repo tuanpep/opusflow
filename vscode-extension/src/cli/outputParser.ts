@@ -189,11 +189,11 @@ export class OutputParser {
         return {
             task: idMatch
                 ? {
-                      id: idMatch[1],
-                      title: titleMatch ? titleMatch[1].trim() : '',
-                      status: 'pending',
-                      files: []
-                  }
+                    id: idMatch[1],
+                    title: titleMatch ? titleMatch[1].trim() : '',
+                    status: 'pending',
+                    files: []
+                }
                 : null,
             prompt: stdout,
             allCompleted: false
@@ -233,7 +233,7 @@ export class OutputParser {
         let match;
         while ((match = agentRegex.exec(stdout)) !== null) {
             const available = match[2] === '✅';
-            const installMatch = stdout.match(new RegExp(`Install: \`([^\`]+)\``, 'g'));
+            const installMatch = stdout.match(new RegExp('Install: `([^`]+)`', 'g'));
 
             agents.push({
                 name: match[1],

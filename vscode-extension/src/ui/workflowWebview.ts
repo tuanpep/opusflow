@@ -66,7 +66,7 @@ export class WorkflowWebview {
         const opusflowDir = path.join(rootPath, '.opusflow');
 
         // 1. Get Phases
-        let phases = [];
+        const phases = [];
         const phasesFile = path.join(planningDir, 'phases.md');
         if (fs.existsSync(phasesFile)) {
             // Simple parsing or just return content? content is better for flexibility.
@@ -108,7 +108,7 @@ export class WorkflowWebview {
         }
 
         // 4. Tasks (Count)
-        let taskStats = { total: 0, done: 0, pending: 0, in_progress: 0 };
+        const taskStats = { total: 0, done: 0, pending: 0, in_progress: 0 };
         if (fs.existsSync(opusflowDir)) {
             const taskFiles = fs.readdirSync(opusflowDir).filter(f => f.startsWith('tasks-') && f.endsWith('.json'));
             // Maybe just the latest one?
@@ -124,10 +124,11 @@ export class WorkflowWebview {
                         taskStats.in_progress = q.tasks.filter((t: any) => t.status === 'in_progress').length;
                         taskStats.pending = taskStats.total - taskStats.done - taskStats.in_progress;
                     }
-                } catch (e) { }
+                } catch (_e) {
+                    // Ignore JSON parse errors
+                }
             }
         }
-
         return {
             activePlan,
             activeVerification,

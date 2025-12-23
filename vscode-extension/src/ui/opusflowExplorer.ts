@@ -46,7 +46,9 @@ export class OpusFlowExplorerProvider implements vscode.TreeDataProvider<Plannin
         // Ensure dirs exist
         ['specs', 'phases', 'plans', 'verifications'].forEach((d) => {
             const p = path.join(planningDir, d);
-            if (!fs.existsSync(p)) fs.mkdirSync(p, { recursive: true });
+            if (!fs.existsSync(p)) {
+                fs.mkdirSync(p, { recursive: true });
+            }
         });
 
         const categories: PlanningItem[] = [
@@ -92,7 +94,9 @@ export class OpusFlowExplorerProvider implements vscode.TreeDataProvider<Plannin
 
         if (categoryType === 'tasks') {
             // List task queue files
-            if (!fs.existsSync(opusflowDir)) return [];
+            if (!fs.existsSync(opusflowDir)) {
+                return [];
+            }
 
             const taskFiles = fs.readdirSync(opusflowDir).filter((f) => f.startsWith('tasks-'));
             return taskFiles.map((file) => {
@@ -112,7 +116,9 @@ export class OpusFlowExplorerProvider implements vscode.TreeDataProvider<Plannin
         };
 
         const subDir = path.join(planningDir, dirMap[categoryType] || categoryType);
-        if (!fs.existsSync(subDir)) return [];
+        if (!fs.existsSync(subDir)) {
+            return [];
+        }
 
         const files = fs.readdirSync(subDir).filter((f) => !f.startsWith('.') && f.endsWith('.md'));
 
@@ -150,7 +156,9 @@ export class OpusFlowExplorerProvider implements vscode.TreeDataProvider<Plannin
 
     private getPlanChildren(element: PlanningItem, planningDir: string): PlanningItem[] {
         const verificationsDir = path.join(planningDir, 'verifications');
-        if (!fs.existsSync(verificationsDir)) return [];
+        if (!fs.existsSync(verificationsDir)) {
+            return [];
+        }
 
         const planName = path.parse(element.label).name;
         const verifyFiles = fs.readdirSync(verificationsDir).filter((f) => f.includes(planName));
@@ -173,7 +181,9 @@ export class OpusFlowExplorerProvider implements vscode.TreeDataProvider<Plannin
 
     private getTaskQueueChildren(element: PlanningItem, opusflowDir: string): PlanningItem[] {
         const filePath = element.metadata?.filePath;
-        if (!filePath || !fs.existsSync(filePath)) return [];
+        if (!filePath || !fs.existsSync(filePath)) {
+            return [];
+        }
 
         try {
             const content = fs.readFileSync(filePath, 'utf-8');

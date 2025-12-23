@@ -27,6 +27,7 @@ describe('OpusFlowWrapper', () => {
 
             const result = await wrapper.plan('New Feature');
             expect(result.fullPath).to.equal('/path/to/plan.md');
+            // eslint-disable-next-line @typescript-eslint/no-unused-expressions
             expect(processManagerStub.run.calledWith('opusflow', ['plan', 'New Feature'])).to.be.true;
         });
 
@@ -66,12 +67,14 @@ describe('OpusFlowWrapper', () => {
         it('should return true if --help succeeds', async () => {
             processManagerStub.run.resolves({ stdout: '', stderr: '', exitCode: 0 });
             const installed = await wrapper.isInstalled();
+            // eslint-disable-next-line @typescript-eslint/no-unused-expressions
             expect(installed).to.be.true;
         });
 
         it('should return false if --help fails', async () => {
             processManagerStub.run.rejects(new Error('not found'));
             const installed = await wrapper.isInstalled();
+            // eslint-disable-next-line @typescript-eslint/no-unused-expressions
             expect(installed).to.be.false;
         });
     });
