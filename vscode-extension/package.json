@@ -2,7 +2,7 @@
   "name": "vscode-opusflow",
   "displayName": "OpusFlow",
   "description": "VSCode extension for OpusFlow - Spec-Driven Development with AI agents",
-  "version": "0.5.1",
+  "version": "0.5.2",
   "icon": "resources/icon.png",
   "publisher": "opusflow",
   "engines": {
