@@ -1,5 +1,9 @@
 # OpusFlow
 
+[![CLI Release](https://img.shields.io/github/v/release/tuanpep/opusflow?filter=v*&label=CLI)](https://github.com/tuanpep/opusflow/releases/latest)
+[![VSCode Extension](https://img.shields.io/github/v/release/tuanpep/opusflow?filter=vscode-*&label=VSCode)](https://github.com/tuanpep/opusflow/releases?q=vscode)
+[![Go Version](https://img.shields.io/github/go-mod/go-version/tuanpep/opusflow?filename=cli/go.mod)](https://go.dev/)
+
 A spec-driven development tool to orchestrate coding agents.
 
 ## Installation
