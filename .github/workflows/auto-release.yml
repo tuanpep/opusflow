@@ -4,66 +4,94 @@ on:
   push:
     branches:
       - main
+    paths:
+      # Only trigger on code changes, not docs or configs
+      - 'cli/**'
+      - 'vscode-extension/**'
+      - '.goreleaser.yaml'
   workflow_dispatch:
+    inputs:
+      bump_type:
+        description: 'Version bump type'
+        required: false
+        default: 'auto'
+        type: choice
+        options:
+          - auto
+          - patch
+          - minor
+          - major
 
 permissions:
   contents: write
-  packages: write
 
 jobs:
   auto-release:
     runs-on: ubuntu-latest
     # Skip release for docs, test, ci, and chore commits
     if: |
-      !startsWith(github.event.head_commit.message, 'docs:') &&
-      !startsWith(github.event.head_commit.message, 'test:') &&
-      !startsWith(github.event.head_commit.message, 'ci:') &&
-      !startsWith(github.event.head_commit.message, 'chore:') &&
-      !contains(github.event.head_commit.message, '[skip-release]')
+      github.event_name == 'workflow_dispatch' ||
+      (!startsWith(github.event.head_commit.message, 'docs:') &&
+       !startsWith(github.event.head_commit.message, 'test:') &&
+       !startsWith(github.event.head_commit.message, 'ci:') &&
+       !startsWith(github.event.head_commit.message, 'chore:') &&
+       !contains(github.event.head_commit.message, '[skip-release]'))
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
+      - name: Determine bump type
+        id: bump_type
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ] && [ "${{ inputs.bump_type }}" != "auto" ]; then
+            echo "bump=${{ inputs.bump_type }}" >> $GITHUB_OUTPUT
+          else
+            # Auto-detect from commit message
+            MSG="${{ github.event.head_commit.message }}"
+            if echo "$MSG" | grep -qE '^feat(\(.+\))?!:|BREAKING CHANGE'; then
+              echo "bump=major" >> $GITHUB_OUTPUT
+            elif echo "$MSG" | grep -qE '^feat(\(.+\))?:'; then
+              echo "bump=minor" >> $GITHUB_OUTPUT
+            else
+              echo "bump=patch" >> $GITHUB_OUTPUT
+            fi
+          fi
+
       - name: Bump version and push tag
         id: tag_version
         uses: mathieudutour/github-tag-action@v6.2
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          default_bump: patch
-
-      - name: Fetch new tag
-        run: |
-          git fetch --tags
-          git checkout ${{ steps.tag_version.outputs.new_tag }}
+          default_bump: ${{ steps.bump_type.outputs.bump }}
 
       - name: Set up Go
         uses: actions/setup-go@v5
         with:
-          go-version: '1.23'
+          go-version-file: cli/go.mod
+          cache-dependency-path: cli/go.sum
 
       - name: Run GoReleaser
         uses: goreleaser/goreleaser-action@v6
         with:
           distribution: goreleaser
-          version: latest
+          version: '~> v2'
           args: release --clean
+          workdir: .
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Update major version tag
         run: |
-          # Extract major version from tag (v1.2.3 -> v1)
           TAG="${{ steps.tag_version.outputs.new_tag }}"
           MAJOR=$(echo "$TAG" | sed -E 's/^(v[0-9]+).*/\1/')
           
           echo "Updating $MAJOR to point to $TAG"
           
-          # Delete existing major tag if exists
-          git tag -d "$MAJOR" 2>/dev/null || true
-          git push origin ":refs/tags/$MAJOR" 2>/dev/null || true
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
           
-          # Create new major tag pointing to current release
-          git tag "$MAJOR"
-          git push origin "$MAJOR"
+          git tag -fa "$MAJOR" -m "Update $MAJOR to $TAG"
+          git push origin "$MAJOR" --force

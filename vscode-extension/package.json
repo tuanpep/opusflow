@@ -3,6 +3,7 @@
   "displayName": "OpusFlow",
   "description": "VSCode extension for OpusFlow - Spec-Driven Development with AI agents",
   "version": "0.5.1",
+  "icon": "resources/icon.png",
   "publisher": "opusflow",
   "engines": {
     "vscode": "^1.104.0"
@@ -47,7 +48,7 @@
         {
           "id": "opusflow",
           "title": "OpusFlow",
-          "icon": "resources/opusflow-icon.svg"
+          "icon": "resources/icon.png"
         }
       ]
     },
@@ -56,7 +57,7 @@
         {
           "id": "opusflowExplorer",
           "name": "Project Status",
-          "icon": "resources/opusflow-icon.svg"
+          "icon": "resources/icon.png"
         }
       ]
     },
@@ -72,9 +73,11 @@
           "type": "string",
           "enum": [
             "cursor",
+            "aider",
+            "claude-code",
             "gemini"
           ],
-          "default": "gemini",
+          "default": "cursor",
           "description": "Default AI agent for task execution"
         },
         "opusflow.autoRefresh": {

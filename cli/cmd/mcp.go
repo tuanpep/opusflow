@@ -17,7 +17,7 @@ var mcpCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		// Just a friendly startup message (stderr so it doesn't break JSON-RPC on stdout)
 		// The agent/client might see this in logs.
-		fmt.Fprintf(cmd.ErrOrStderr(), "Starting OpusFlow MCP Server v1.2.0\n")
+		fmt.Fprintf(cmd.ErrOrStderr(), "Starting OpusFlow MCP Server %s\n", Version)
 		fmt.Fprintf(cmd.ErrOrStderr(), "  - create_plan\n")
 		fmt.Fprintf(cmd.ErrOrStderr(), "  - generate_prompt\n")
 		fmt.Fprintf(cmd.ErrOrStderr(), "  - get_codebase_map (new)\n")
@@ -29,7 +29,7 @@ var mcpCmd = &cobra.Command{
 
 		s := server.NewMCPServer(
 			"OpusFlow MCP",
-			"1.2.0",
+			Version,
 		)
 
 		// Tool: create_plan

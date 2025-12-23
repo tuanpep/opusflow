@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os/exec"
 	"path/filepath"
+	"slices"
 	"strings"
 	"time"
 
@@ -241,7 +242,7 @@ func extractFilesFromPlan(content string) []string {
 			end := strings.LastIndex(line, "`")
 			if start != -1 && end > start {
 				path := line[start+1 : end]
-				if path != "" && !contains(files, path) {
+				if path != "" && !slices.Contains(files, path) {
 					files = append(files, path)
 				}
 			}

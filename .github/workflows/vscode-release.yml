@@ -1,0 +1,134 @@
+name: VSCode Extension Release
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'vscode-extension/**'
+      - '.github/workflows/vscode-release.yml'
+  workflow_dispatch:
+    inputs:
+      version_bump:
+        description: 'Version bump type'
+        required: false
+        default: 'patch'
+        type: choice
+        options:
+          - patch
+          - minor
+          - major
+
+permissions:
+  contents: write
+
+defaults:
+  run:
+    working-directory: vscode-extension
+
+jobs:
+  build-and-release:
+    runs-on: ubuntu-latest
+    # Skip for non-code commits
+    if: |
+      github.event_name == 'workflow_dispatch' ||
+      (!startsWith(github.event.head_commit.message, 'docs:') &&
+       !startsWith(github.event.head_commit.message, 'chore:') &&
+       !contains(github.event.head_commit.message, '[skip-release]'))
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: vscode-extension/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run lint
+        run: npm run lint
+
+      - name: Compile
+        run: npm run compile
+
+      - name: Get current version
+        id: current_version
+        run: |
+          VERSION=$(node -p "require('./package.json').version")
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+      - name: Bump version
+        id: bump_version
+        run: |
+          BUMP_TYPE="${{ github.event.inputs.version_bump || 'patch' }}"
+          
+          # Auto-detect from commit message if not manual
+          if [ "${{ github.event_name }}" != "workflow_dispatch" ]; then
+            MSG="${{ github.event.head_commit.message }}"
+            if echo "$MSG" | grep -qE '^feat(\(.+\))?!:|BREAKING CHANGE'; then
+              BUMP_TYPE="major"
+            elif echo "$MSG" | grep -qE '^feat(\(.+\))?:'; then
+              BUMP_TYPE="minor"
+            else
+              BUMP_TYPE="patch"
+            fi
+          fi
+          
+          npm version $BUMP_TYPE --no-git-tag-version
+          NEW_VERSION=$(node -p "require('./package.json').version")
+          echo "new_version=$NEW_VERSION" >> $GITHUB_OUTPUT
+          echo "Bumped to v$NEW_VERSION"
+
+      - name: Package extension
+        run: npx @vscode/vsce package
+
+      - name: Get VSIX filename
+        id: vsix
+        run: |
+          VSIX_FILE=$(ls *.vsix | head -1)
+          echo "filename=$VSIX_FILE" >> $GITHUB_OUTPUT
+
+      - name: Commit version bump
+        run: |
+          cd ..
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add vscode-extension/package.json
+          git commit -m "chore(vscode): bump version to ${{ steps.bump_version.outputs.new_version }} [skip-release]"
+          git push
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: vscode-v${{ steps.bump_version.outputs.new_version }}
+          name: VSCode Extension v${{ steps.bump_version.outputs.new_version }}
+          body: |
+            ## OpusFlow VSCode Extension v${{ steps.bump_version.outputs.new_version }}
+            
+            ### Installation
+            1. Download the `.vsix` file below
+            2. In VSCode: `Extensions` → `...` → `Install from VSIX...`
+            
+            Or install via command line:
+            ```bash
+            code --install-extension ${{ steps.vsix.outputs.filename }}
+            ```
+          files: vscode-extension/${{ steps.vsix.outputs.filename }}
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      # Optional: Publish to VS Code Marketplace
+      # Uncomment when you have VSCE_PAT secret configured
+      # - name: Publish to Marketplace
+      #   run: npx @vscode/vsce publish
+      #   env:
+      #     VSCE_PAT: ${{ secrets.VSCE_PAT }}

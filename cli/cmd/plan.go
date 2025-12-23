@@ -12,7 +12,7 @@ var planCmd = &cobra.Command{
 	Use:   "plan [title]",
 	Short: "Create a new implementation plan",
 	Args:  cobra.MinimumNArgs(1),
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		title := strings.Join(args, " ")
 
 		// For CLI usage, we default the goal to the title or empty if we don't prompt for it.
@@ -21,13 +21,13 @@ var planCmd = &cobra.Command{
 
 		result, err := ops.CreatePlan(title, goal)
 		if err != nil {
-			fmt.Printf("Error: %v\n", err)
-			return
+			return fmt.Errorf("failed to create plan: %w", err)
 		}
 
 		fmt.Printf("Created plan: %s\n", result.FullPath)
 		fmt.Printf("To fill this plan, run:\n")
 		fmt.Printf("  opusflow prompt plan %s\n", result.Filename)
+		return nil
 	},
 }
 

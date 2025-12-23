@@ -1,78 +1,94 @@
 #!/bin/bash
-set -e
+set -euo pipefail
 
+# Configuration
 OWNER="tuanpep"
 REPO="opusflow"
 BINARY="opusflow"
-INSTALL_DIR="/usr/local/bin"
+INSTALL_DIR="${INSTALL_DIR:-/usr/local/bin}"
 
-# Detect OS and Arch
+# Colors for output
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+NC='\033[0m' # No Color
+
+info() { echo -e "${GREEN}▶${NC} $1"; }
+warn() { echo -e "${YELLOW}⚠${NC} $1"; }
+error() { echo -e "${RED}✖${NC} $1" >&2; exit 1; }
+
+# Check required commands
+for cmd in curl tar; do
+    command -v "$cmd" >/dev/null 2>&1 || error "Required command not found: $cmd"
+done
+
+# Detect OS
 OS="$(uname -s)"
-ARCH="$(uname -m)"
-
 case "$OS" in
     Linux)  OS_TYPE="linux" ;;
     Darwin) OS_TYPE="darwin" ;;
-    *) echo "Unsupported OS: $OS"; exit 1 ;;
+    MINGW*|MSYS*|CYGWIN*) error "Windows detected. Please download from GitHub releases manually." ;;
+    *) error "Unsupported OS: $OS" ;;
 esac
 
+# Detect Architecture
+ARCH="$(uname -m)"
 case "$ARCH" in
-    x86_64) ARCH_TYPE="amd64" ;;
-    arm64|aarch64)  ARCH_TYPE="arm64" ;;
-    *) echo "Unsupported Arch: $ARCH"; exit 1 ;;
+    x86_64|amd64) ARCH_TYPE="amd64" ;;
+    arm64|aarch64) ARCH_TYPE="arm64" ;;
+    *) error "Unsupported architecture: $ARCH" ;;
 esac
 
-echo "Detected $OS_TYPE $ARCH_TYPE"
+info "Detected: $OS_TYPE/$ARCH_TYPE"
 
-# Find latest version using GitHub API
-LATEST_URL="https://api.github.com/repos/$OWNER/$REPO/releases/latest"
-echo "Fetching latest release from $LATEST_URL..."
+# Fetch latest release
+API_URL="https://api.github.com/repos/$OWNER/$REPO/releases/latest"
+info "Fetching latest release..."
 
-# Verify release exists
-RELEASE_JSON=$(curl -s $LATEST_URL)
-if echo "$RELEASE_JSON" | grep -q "Not Found"; then
-    echo "Error: Repository or Release not found at $OWNER/$REPO"
-    exit 1
-fi
+RELEASE_JSON=$(curl -fsSL "$API_URL" 2>/dev/null) || error "Failed to fetch release info. Check your internet connection."
 
-# Extract version tag
-VERSION=$(echo "$RELEASE_JSON" | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/')
-if [ -z "$VERSION" ]; then
-    echo "Error: Could not find latest version"
-    exit 1
-fi
+# Extract version
+VERSION=$(echo "$RELEASE_JSON" | grep '"tag_name":' | sed -E 's/.*"tag_name":\s*"([^"]+)".*/\1/' | head -1)
+[ -z "$VERSION" ] && error "Could not determine latest version"
 
-echo "Latest version: $VERSION"
+info "Latest version: $VERSION"
 
-# Construct download URL (matching GoReleaser naming convention in .goreleaser.yaml)
-# GoReleaser default strips 'v' from version in filenames
-# Tag: v0.1.1 -> Version: 0.1.1
+# Build download URL (GoReleaser strips 'v' prefix from version in archive names)
 CLEAN_VERSION="${VERSION#v}"
 ASSET_NAME="${BINARY}_${CLEAN_VERSION}_${OS_TYPE}_${ARCH_TYPE}.tar.gz"
 DOWNLOAD_URL="https://github.com/$OWNER/$REPO/releases/download/$VERSION/$ASSET_NAME"
 
-echo "Downloading $DOWNLOAD_URL..."
+# Download
+info "Downloading $ASSET_NAME..."
 TMP_DIR=$(mktemp -d)
-curl -sL "$DOWNLOAD_URL" -o "$TMP_DIR/$ASSET_NAME"
+trap 'rm -rf "$TMP_DIR"' EXIT
 
-if [ ! -f "$TMP_DIR/$ASSET_NAME" ]; then
-    echo "Error: Download failed or asset not found."
-    exit 1
-fi
+HTTP_CODE=$(curl -sL -w "%{http_code}" "$DOWNLOAD_URL" -o "$TMP_DIR/$ASSET_NAME")
+[ "$HTTP_CODE" != "200" ] && error "Download failed (HTTP $HTTP_CODE). Asset: $ASSET_NAME"
 
-echo "Extracting..."
-tar -xzf "$TMP_DIR/$ASSET_NAME" -C "$TMP_DIR"
+# Extract
+info "Extracting..."
+tar -xzf "$TMP_DIR/$ASSET_NAME" -C "$TMP_DIR" || error "Failed to extract archive"
 
-echo "Installing to $INSTALL_DIR..."
-# Check if sudo is needed
+[ -f "$TMP_DIR/$BINARY" ] || error "Binary not found in archive"
+
+# Install
+info "Installing to $INSTALL_DIR..."
 if [ -w "$INSTALL_DIR" ]; then
     mv "$TMP_DIR/$BINARY" "$INSTALL_DIR/"
 else
+    warn "Elevated permissions required for $INSTALL_DIR"
     sudo mv "$TMP_DIR/$BINARY" "$INSTALL_DIR/"
 fi
 
-# Cleanup
-rm -rf "$TMP_DIR"
+chmod +x "$INSTALL_DIR/$BINARY"
 
-echo "Success! $BINARY installed to $INSTALL_DIR"
-$BINARY --help
+# Verify
+if command -v "$BINARY" >/dev/null 2>&1; then
+    echo ""
+    info "Successfully installed $BINARY $VERSION"
+    echo ""
+    "$BINARY" --version
+else
+    warn "Installed but '$BINARY' not in PATH. Add $INSTALL_DIR to your PATH."
+fi

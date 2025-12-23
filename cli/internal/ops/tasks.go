@@ -6,6 +6,7 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
+	"slices"
 	"strings"
 	"time"
 
@@ -119,7 +120,7 @@ func extractTasksFromPlan(content string) []Task {
 		if inStep && currentTask != nil {
 			if matches := filePattern.FindStringSubmatch(line); matches != nil {
 				filePath := matches[1]
-				if !contains(currentTask.Files, filePath) {
+				if !slices.Contains(currentTask.Files, filePath) {
 					currentTask.Files = append(currentTask.Files, filePath)
 				}
 			}
@@ -127,7 +128,7 @@ func extractTasksFromPlan(content string) []Task {
 			// Check for action type
 			if matches := actionPattern.FindStringSubmatch(line); matches != nil {
 				action := matches[1]
-				if !contains(currentTask.Actions, action) {
+				if !slices.Contains(currentTask.Actions, action) {
 					currentTask.Actions = append(currentTask.Actions, action)
 				}
 			}
@@ -156,16 +157,6 @@ func extractTasksFromPlan(content string) []Task {
 	}
 
 	return tasks
-}
-
-// contains checks if a slice contains a string
-func contains(slice []string, item string) bool {
-	for _, s := range slice {
-		if s == item {
-			return true
-		}
-	}
-	return false
 }
 
 // SaveTaskQueue saves the task queue to a file
